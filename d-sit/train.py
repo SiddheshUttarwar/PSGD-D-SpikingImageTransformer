@@ -15,7 +15,7 @@ from optimizer import ProximalAdamW
 # ---------------------------------------------------------------------------
 # Training Loop
 # ---------------------------------------------------------------------------
-def train_epoch(model, dataloader, optimizer, criterion, scaler, device, accum_steps=4):
+def train_epoch(model, dataloader, optimizer, criterion, scaler, device, accum_steps=4, use_amp=False):
     model.train()
     total_loss = 0.0
     correct = 0
@@ -28,8 +28,8 @@ def train_epoch(model, dataloader, optimizer, criterion, scaler, device, accum_s
         images = batch['image'].to(device, non_blocking=True)
         labels = batch['label'].to(device, non_blocking=True)
 
-        # Forward pass with AMP
-        with torch.cuda.amp.autocast(enabled=(device.type == 'cuda')):
+        # Forward pass (AMP disabled by default — custom DAPSG autograd produces NaN in float16)
+        with torch.amp.autocast('cuda', enabled=use_amp):
             logits = model(images)
             loss = criterion(logits, labels) / accum_steps
 
@@ -83,9 +83,8 @@ def validate(model, dataloader, criterion, device):
         images = batch['image'].to(device, non_blocking=True)
         labels = batch['label'].to(device, non_blocking=True)
 
-        with torch.cuda.amp.autocast(enabled=(device.type == 'cuda')):
-            logits = model(images)
-            loss = criterion(logits, labels)
+        logits = model(images)
+        loss = criterion(logits, labels)
 
         total_loss += loss.item()
         preds = logits.argmax(dim=1)
@@ -182,6 +181,8 @@ def main():
                         help='Proximal sparsity regularization strength')
     parser.add_argument('--resume', type=str, default=None,
                         help='Path to checkpoint to resume from')
+    parser.add_argument('--amp', action='store_true', default=False,
+                        help='Enable AMP mixed precision (BROKEN with custom DAPSG — use only for debugging)')
     args = parser.parse_args()
 
     # --- Dataset Configuration ---
@@ -253,7 +254,8 @@ def main():
         optimizer, schedulers=[warmup_scheduler, cosine_scheduler], milestones=[warmup_epochs]
     )
     criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
-    scaler = torch.cuda.amp.GradScaler(enabled=(device.type == 'cuda'))
+    scaler = torch.amp.GradScaler('cuda', enabled=args.amp)
+    print(f"AMP: {'ENABLED' if args.amp else 'DISABLED (safe mode for custom surrogate gradients)'}")
 
     start_epoch = 0
     best_val_acc = 0.0
@@ -281,7 +283,7 @@ def main():
         print(f"{'='*60}")
 
         train_loss, train_acc = train_epoch(
-            model, train_loader, optimizer, criterion, scaler, device, args.accum_steps
+            model, train_loader, optimizer, criterion, scaler, device, args.accum_steps, use_amp=args.amp
         )
         val_loss, val_acc = validate(model, val_loader, criterion, device)
 

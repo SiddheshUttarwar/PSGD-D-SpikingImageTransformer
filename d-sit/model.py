@@ -125,19 +125,24 @@ class SpikingMLP(nn.Module):
 class DSITBlock(nn.Module):
     """
     Single D-SIT transformer block: SSA -> S-MLP
-    with spike-based residual connection to prevent dead-neuron cascading.
+    with ReZero-style scaled residual to prevent gradient explosion.
+
+    Diagnostic showed gradients exploding ~1000x per block through unscaled
+    residual. ReZero initializes the residual scale at 0.1 so each block's
+    contribution starts small and is learned during training.
     """
     def __init__(self, embed_dim=768, num_heads=12, mlp_ratio=4.0):
         super().__init__()
         self.attn = HeterogeneousSpikingSelfAttention(embed_dim, num_heads)
         self.mlp = SpikingMLP(embed_dim, int(embed_dim * mlp_ratio))
+        # ReZero: learnable scale on the branch, initialized small
+        self.res_scale = nn.Parameter(torch.tensor(0.1))
 
     def reset_state(self):
         self.attn.reset_state()
         self.mlp.reset_state()
 
     def forward(self, x, d_tracker, mask=None, residual_u=None):
-        # Save input for residual
         identity = x
 
         # Attention
@@ -146,10 +151,8 @@ class DSITBlock(nn.Module):
         # MLP with membrane shortcut
         x_out, u_out = self.mlp(x_attn, d_tracker, residual_u=residual_u)
 
-        # Spike-based residual: add input spikes to output spikes.
-        # This ensures gradient flow even if the attention or MLP is dead.
-        # The result may exceed {0,1} but pooling at the end averages this out.
-        x_out = x_out + identity
+        # Scaled residual: prevents gradient explosion through the block chain
+        x_out = identity + self.res_scale * x_out
 
         return x_out, u_out
 
