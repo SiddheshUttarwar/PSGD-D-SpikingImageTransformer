@@ -253,9 +253,16 @@ def main():
         ckpt = torch.load(args.resume, map_location=device)
         model.load_state_dict(ckpt['model_state_dict'])
         optimizer.load_state_dict(ckpt['optimizer_state_dict'])
+        if 'scheduler_state_dict' in ckpt:
+            scheduler.load_state_dict(ckpt['scheduler_state_dict'])
+        if 'scaler_state_dict' in ckpt:
+            scaler.load_state_dict(ckpt['scaler_state_dict'])
+        if 'D_t' in ckpt:
+            model.d_tracker.current_D = ckpt['D_t']
         start_epoch = ckpt.get('epoch', 0) + 1
         best_val_acc = ckpt.get('best_val_acc', 0.0)
         print(f"Resumed from epoch {start_epoch}, best_val_acc={best_val_acc*100:.2f}%")
+        print(f"  LR: {scheduler.get_last_lr()[0]:.6f}, D(t): {model.d_tracker.get_D():.6f}")
 
     # --- Training ---
     for epoch in range(start_epoch, args.epochs):
@@ -287,6 +294,8 @@ def main():
             'epoch': epoch,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
+            'scheduler_state_dict': scheduler.state_dict(),
+            'scaler_state_dict': scaler.state_dict(),
             'best_val_acc': best_val_acc,
             'D_t': model.d_tracker.get_D(),
         }
