@@ -5,9 +5,9 @@ import torch.nn as nn
 class DopamineTracker:
     """
     Tracks the global Dopamine signal D(t) representing the Reward Prediction Error.
-    
+
     D(t) = E[exp(-gamma * (1 - confidence))]
-    
+
     When classification error is high (confidence ~ 0), D(t) -> exp(-gamma) ~ 0.
     When classification is correct (confidence ~ 1), D(t) -> exp(0) = 1.
     This controls the surrogate width alpha(D) = alpha_base / (1 + kappa * D).
@@ -29,7 +29,6 @@ class DopamineTracker:
             else:
                 confidence = (probs * R_t).sum(dim=-1)
 
-            # RPE = 1.0 - confidence; D(t) = E[exp(-gamma * RPE)]
             rpe = 1.0 - confidence
             D = torch.exp(-self.gamma * rpe).mean().item()
 
@@ -42,15 +41,14 @@ class DopamineTracker:
 class DAPSG(torch.autograd.Function):
     """
     Dopamine-Modulated Proximal Surrogate Gradient (DA-PSG).
-    
+
     Forward: Heaviside step function s = Theta(u - V_th)
     Backward: sigma'_DA(u) = 1/(2*alpha) * (1 + |u - V_th|/alpha)^(-2)
               where alpha = alpha_base / (1 + kappa * D(t))
     """
     @staticmethod
     def forward(ctx, u, v_th, d_tracker, alpha_base, kappa):
-        ctx.save_for_backward(u)
-        ctx.v_th = v_th
+        ctx.save_for_backward(u, v_th)
         ctx.d_tracker = d_tracker
         ctx.alpha_base = alpha_base
         ctx.kappa = kappa
@@ -59,29 +57,32 @@ class DAPSG(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad_output):
-        u, = ctx.saved_tensors
+        u, v_th = ctx.saved_tensors
         D = ctx.d_tracker.get_D()
 
         alpha = ctx.alpha_base / (1.0 + ctx.kappa * D)
 
         # Surrogate derivative from Eq. 4 in the paper
-        grad_u = (1.0 / (2.0 * alpha)) * (1.0 + (u - ctx.v_th).abs() / alpha).pow(-2)
+        grad_u = (1.0 / (2.0 * alpha)) * (1.0 + (u - v_th).abs() / alpha).pow(-2)
 
         return grad_output * grad_u, None, None, None, None
 
 
 class LIFNode(nn.Module):
     """
-    Leaky Integrate-and-Fire neuron with Membrane Shortcuts and DA-PSG backward.
-
-    The membrane potential is DETACHED between timesteps so the backward pass
-    does not unroll through the entire temporal sequence (which would cause OOM
-    on a T4). Spatial gradients still flow through the surrogate at each step.
+    Leaky Integrate-and-Fire neuron with:
+    - Learnable firing threshold (per-layer)
+    - Membrane shortcuts
+    - DA-PSG backward pass
+    - Detached temporal state to prevent OOM
     """
-    def __init__(self, v_th=1.0, tau=2.0, alpha_base=1.0, kappa=10.0):
+    def __init__(self, v_th=0.5, tau=4.0, alpha_base=1.0, kappa=10.0, learnable_th=True):
         super().__init__()
-        self.v_th = v_th
-        self.decay = 1.0 - (1.0 / tau)  # membrane leak factor
+        if learnable_th:
+            self.v_th = nn.Parameter(torch.tensor(v_th))
+        else:
+            self.register_buffer('v_th', torch.tensor(v_th))
+        self.decay = 1.0 - (1.0 / tau)  # tau=4 -> decay=0.75
         self.alpha_base = alpha_base
         self.kappa = kappa
         self.u = None
@@ -91,8 +92,8 @@ class LIFNode(nn.Module):
 
     def forward(self, x, d_tracker, residual_u=None):
         """
-        x: Input current at time t.  Shape: arbitrary (matches neuron population)
-        d_tracker: DopamineTracker instance (global, shared across all neurons)
+        x: Input current at time t
+        d_tracker: DopamineTracker instance
         residual_u: Optional membrane shortcut from a previous block
         Returns: (spike, effective_u)
         """
@@ -102,7 +103,7 @@ class LIFNode(nn.Module):
         # Leaky integration (decay old state, add new input)
         self.u = self.u.detach() * self.decay + x
 
-        # Membrane shortcut (paper Eq: u^l(t) = u^l_residual(t) + u^{l-1}(t))
+        # Membrane shortcut
         if residual_u is not None:
             effective_u = self.u + residual_u
         else:
@@ -111,7 +112,7 @@ class LIFNode(nn.Module):
         # Spiking with DA-PSG surrogate
         spike = DAPSG.apply(effective_u, self.v_th, d_tracker, self.alpha_base, self.kappa)
 
-        # Soft reset: subtract threshold from membrane potential for neurons that spiked
-        self.u = self.u - spike.detach() * self.v_th
+        # Soft reset
+        self.u = self.u - spike.detach() * self.v_th.detach()
 
         return spike, effective_u

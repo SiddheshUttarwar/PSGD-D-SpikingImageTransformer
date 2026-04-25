@@ -241,7 +241,17 @@ def main():
         prox_lambda=args.prox_lambda,
         num_heads=args.num_heads
     )
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs, eta_min=1e-5)
+    # Warmup + Cosine schedule: critical for SNN to stabilize firing rates early
+    warmup_epochs = min(10, args.epochs // 5)
+    warmup_scheduler = torch.optim.lr_scheduler.LinearLR(
+        optimizer, start_factor=0.01, end_factor=1.0, total_iters=warmup_epochs
+    )
+    cosine_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        optimizer, T_max=args.epochs - warmup_epochs, eta_min=1e-5
+    )
+    scheduler = torch.optim.lr_scheduler.SequentialLR(
+        optimizer, schedulers=[warmup_scheduler, cosine_scheduler], milestones=[warmup_epochs]
+    )
     criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
     scaler = torch.cuda.amp.GradScaler(enabled=(device.type == 'cuda'))
 
