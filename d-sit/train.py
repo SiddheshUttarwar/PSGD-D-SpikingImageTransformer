@@ -27,15 +27,20 @@ except ImportError:
 def _get_device():
     """Auto-detect TPU → GPU → CPU in that priority order."""
     if _HAS_XLA:
-        return xm.xla_device(), 'tpu'
+        try:
+            import torch_xla
+            device = torch_xla.device()
+            return device, 'tpu'
+        except Exception as e:
+            print(f"[warn] TPU unavailable ({e}), falling back to GPU/CPU.")
     if torch.cuda.is_available():
         return torch.device('cuda'), 'cuda'
     return torch.device('cpu'), 'cpu'
 
 
-def _save(obj, path):
+def _save(obj, path, device_type='cuda'):
     """Checkpoint save: xm.save on TPU (ensures lazy tensors materialise), torch.save elsewhere."""
-    if _HAS_XLA:
+    if device_type == 'tpu':
         xm.save(obj, path)
     else:
         torch.save(obj, path)
@@ -468,11 +473,11 @@ def main(args=None):
                 'best_val_acc': best_val_acc,
                 'D_t': model.d_tracker.get_D(),
             }
-            _save(ckpt, 'dsit_latest.pth')
+            _save(ckpt, 'dsit_latest.pth', device_type)
             if is_best:
-                _save(ckpt, 'dsit_best.pth')
+                _save(ckpt, 'dsit_best.pth', device_type)
                 unique_name = f'dsit_best_epoch{epoch+1}_acc{best_val_acc * 100:.2f}.pth'
-                _save(ckpt, unique_name)
+                _save(ckpt, unique_name, device_type)
                 log(f"  *** New best val acc: {best_val_acc * 100:.2f}% (Saved as {unique_name}) ***")
 
         # Keep all cores in lockstep — prevents a fast core from starting the next
