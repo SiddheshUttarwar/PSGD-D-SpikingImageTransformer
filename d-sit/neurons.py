@@ -126,7 +126,9 @@ class LIFNode(nn.Module):
             self.epsilon = torch.zeros_like(x)
             self.prev_spike = torch.zeros_like(x)
 
-        D_t = d_tracker.get_D()
+        # Wrap in a device tensor so XLA keeps D_t in the computation graph
+        # rather than inlining a changing Python scalar (which forces graph retracing).
+        D_t = torch.tensor(d_tracker.get_D(), dtype=x.dtype, device=x.device)
 
         # Dynamic leak controlled by dopamine
         lambda_t = torch.sigmoid(self.w_d * D_t + self.b_lambda)
