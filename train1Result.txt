@@ -1,0 +1,1160 @@
+Device: cuda
+GPU: NVIDIA A100-SXM4-40GB
+VRAM: 42.4 GB
+Loading cifar100 (img_size=32)...
+`trust_remote_code` is not supported anymore.
+Please check that the Hugging Face dataset 'cifar100' isn't based on a loading script and remove `trust_remote_code`.
+If the dataset is based on a loading script, please ask the dataset author to remove it and convert it to a standard format like Parquet.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+`trust_remote_code` is not supported anymore.
+Please check that the Hugging Face dataset 'cifar100' isn't based on a loading script and remove `trust_remote_code`.
+If the dataset is based on a loading script, please ask the dataset author to remove it and convert it to a standard format like Parquet.
+Train samples: 50000, Val samples: 10000
+Building D-SIT: embed_dim=256, depth=8, heads=8, T=4, classes=100
+Parameters: 7.76M
+AMP: DISABLED (safe mode for custom surrogate gradients)
+
+============================================================
+Epoch 1/100  |  LR: 0.000010
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=4.8316, acc=1.11%, D(t)=0.0005]
+Validating: 100% 79/79 [00:10<00:00,  7.45it/s]
+Train Loss: 4.8316 | Train Acc: 1.11%
+Val   Loss: 4.5972 | Val   Acc: 2.54%
+Dopamine D(t): 0.000485
+  *** New best val acc: 2.54% (Saved as dsit_best_epoch1_acc2.54.pth) ***
+
+============================================================
+Epoch 2/100  |  LR: 0.000109
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=4.4373, acc=4.82%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.44it/s]
+Train Loss: 4.4373 | Train Acc: 4.82%
+Val   Loss: 4.0856 | Val   Acc: 10.40%
+Dopamine D(t): 0.000000
+  *** New best val acc: 10.40% (Saved as dsit_best_epoch2_acc10.40.pth) ***
+
+============================================================
+Epoch 3/100  |  LR: 0.000208
+============================================================
+Training: 100% 390/390 [02:20<00:00,  2.77it/s, loss=4.2842, acc=7.61%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.42it/s]
+Train Loss: 4.2842 | Train Acc: 7.61%
+Val   Loss: 3.9092 | Val   Acc: 13.00%
+Dopamine D(t): 0.000000
+  *** New best val acc: 13.00% (Saved as dsit_best_epoch3_acc13.00.pth) ***
+
+============================================================
+Epoch 4/100  |  LR: 0.000307
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=4.1908, acc=9.40%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.43it/s]
+Train Loss: 4.1908 | Train Acc: 9.40%
+Val   Loss: 3.7696 | Val   Acc: 15.87%
+Dopamine D(t): 0.000000
+  *** New best val acc: 15.87% (Saved as dsit_best_epoch4_acc15.87.pth) ***
+
+============================================================
+Epoch 5/100  |  LR: 0.000406
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=4.1304, acc=10.66%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.41it/s]
+Train Loss: 4.1304 | Train Acc: 10.66%
+Val   Loss: 3.6848 | Val   Acc: 17.68%
+Dopamine D(t): 0.000000
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+  *** New best val acc: 17.68% (Saved as dsit_best_epoch5_acc17.68.pth) ***
+
+============================================================
+Epoch 6/100  |  LR: 0.000505
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=4.0740, acc=11.83%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.42it/s]
+Train Loss: 4.0740 | Train Acc: 11.83%
+Val   Loss: 3.6309 | Val   Acc: 17.85%
+Dopamine D(t): 0.000000
+  *** New best val acc: 17.85% (Saved as dsit_best_epoch6_acc17.85.pth) ***
+
+============================================================
+Epoch 7/100  |  LR: 0.000604
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=4.0153, acc=13.11%, D(t)=0.0647]
+Validating: 100% 79/79 [00:10<00:00,  7.46it/s]
+Train Loss: 4.0153 | Train Acc: 13.11%
+Val   Loss: 3.5102 | Val   Acc: 22.23%
+Dopamine D(t): 0.064722
+  *** New best val acc: 22.23% (Saved as dsit_best_epoch7_acc22.23.pth) ***
+
+============================================================
+Epoch 8/100  |  LR: 0.000703
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=3.9834, acc=13.96%, D(t)=0.0154]
+Validating: 100% 79/79 [00:10<00:00,  7.46it/s]
+Train Loss: 3.9834 | Train Acc: 13.96%
+Val   Loss: 3.4711 | Val   Acc: 21.69%
+Dopamine D(t): 0.015442
+
+============================================================
+Epoch 9/100  |  LR: 0.000802
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=3.9560, acc=15.15%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.34it/s]
+Train Loss: 3.9560 | Train Acc: 15.15%
+Val   Loss: 3.4316 | Val   Acc: 23.37%
+Dopamine D(t): 0.000000
+  *** New best val acc: 23.37% (Saved as dsit_best_epoch9_acc23.37.pth) ***
+
+============================================================
+Epoch 10/100  |  LR: 0.000901
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=3.8942, acc=16.04%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.38it/s]
+Train Loss: 3.8942 | Train Acc: 16.04%
+Val   Loss: 3.3938 | Val   Acc: 24.16%
+Dopamine D(t): 0.000000
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+  *** New best val acc: 24.16% (Saved as dsit_best_epoch10_acc24.16.pth) ***
+
+============================================================
+Epoch 11/100  |  LR: 0.001000
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=3.8610, acc=16.95%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.38it/s]
+Train Loss: 3.8610 | Train Acc: 16.95%
+Val   Loss: 3.3404 | Val   Acc: 24.98%
+Dopamine D(t): 0.000000
+  *** New best val acc: 24.98% (Saved as dsit_best_epoch11_acc24.98.pth) ***
+
+============================================================
+Epoch 12/100  |  LR: 0.001000
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.8156, acc=18.13%, D(t)=0.1085]
+Validating: 100% 79/79 [00:10<00:00,  7.48it/s]
+Train Loss: 3.8156 | Train Acc: 18.13%
+Val   Loss: 3.2576 | Val   Acc: 26.65%
+Dopamine D(t): 0.108497
+  *** New best val acc: 26.65% (Saved as dsit_best_epoch12_acc26.65.pth) ***
+
+============================================================
+Epoch 13/100  |  LR: 0.000999
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.7437, acc=19.59%, D(t)=0.0832]
+Validating: 100% 79/79 [00:10<00:00,  7.33it/s]
+Train Loss: 3.7437 | Train Acc: 19.59%
+Val   Loss: 3.1807 | Val   Acc: 29.38%
+Dopamine D(t): 0.083245
+  *** New best val acc: 29.38% (Saved as dsit_best_epoch13_acc29.38.pth) ***
+
+============================================================
+Epoch 14/100  |  LR: 0.000997
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.7252, acc=20.46%, D(t)=0.0682]
+Validating: 100% 79/79 [00:10<00:00,  7.43it/s]
+Train Loss: 3.7252 | Train Acc: 20.46%
+Val   Loss: 3.0953 | Val   Acc: 31.21%
+Dopamine D(t): 0.068157
+  *** New best val acc: 31.21% (Saved as dsit_best_epoch14_acc31.21.pth) ***
+
+============================================================
+Epoch 15/100  |  LR: 0.000995
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.6945, acc=21.20%, D(t)=0.0318]
+Validating: 100% 79/79 [00:10<00:00,  7.46it/s]
+Train Loss: 3.6945 | Train Acc: 21.20%
+Val   Loss: 3.0367 | Val   Acc: 32.04%
+Dopamine D(t): 0.031785
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+  *** New best val acc: 32.04% (Saved as dsit_best_epoch15_acc32.04.pth) ***
+
+============================================================
+Epoch 16/100  |  LR: 0.000992
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=3.6386, acc=22.46%, D(t)=0.1117]
+Validating: 100% 79/79 [00:10<00:00,  7.54it/s]
+Train Loss: 3.6386 | Train Acc: 22.46%
+Val   Loss: 3.0295 | Val   Acc: 33.22%
+Dopamine D(t): 0.111726
+  *** New best val acc: 33.22% (Saved as dsit_best_epoch16_acc33.22.pth) ***
+
+============================================================
+Epoch 17/100  |  LR: 0.000989
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=3.6616, acc=22.22%, D(t)=0.1232]
+Validating: 100% 79/79 [00:10<00:00,  7.38it/s]
+Train Loss: 3.6616 | Train Acc: 22.22%
+Val   Loss: 3.0001 | Val   Acc: 33.73%
+Dopamine D(t): 0.123227
+  *** New best val acc: 33.73% (Saved as dsit_best_epoch17_acc33.73.pth) ***
+
+============================================================
+Epoch 18/100  |  LR: 0.000985
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.5888, acc=23.65%, D(t)=0.0429]
+Validating: 100% 79/79 [00:10<00:00,  7.35it/s]
+Train Loss: 3.5888 | Train Acc: 23.65%
+Val   Loss: 2.9499 | Val   Acc: 35.06%
+Dopamine D(t): 0.042875
+  *** New best val acc: 35.06% (Saved as dsit_best_epoch18_acc35.06.pth) ***
+
+============================================================
+Epoch 19/100  |  LR: 0.000981
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=3.5741, acc=24.67%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.59it/s]
+Train Loss: 3.5741 | Train Acc: 24.67%
+Val   Loss: 2.9428 | Val   Acc: 35.41%
+Dopamine D(t): 0.000000
+  *** New best val acc: 35.41% (Saved as dsit_best_epoch19_acc35.41.pth) ***
+
+============================================================
+Epoch 20/100  |  LR: 0.000976
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=3.5417, acc=25.29%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.43it/s]
+Train Loss: 3.5417 | Train Acc: 25.29%
+Val   Loss: 2.9174 | Val   Acc: 35.64%
+Dopamine D(t): 0.000000
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+  *** New best val acc: 35.64% (Saved as dsit_best_epoch20_acc35.64.pth) ***
+
+============================================================
+Epoch 21/100  |  LR: 0.000970
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=3.5245, acc=25.84%, D(t)=0.1801]
+Validating: 100% 79/79 [00:10<00:00,  7.44it/s]
+Train Loss: 3.5245 | Train Acc: 25.84%
+Val   Loss: 2.8610 | Val   Acc: 36.86%
+Dopamine D(t): 0.180109
+  *** New best val acc: 36.86% (Saved as dsit_best_epoch21_acc36.86.pth) ***
+
+============================================================
+Epoch 22/100  |  LR: 0.000964
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=3.5139, acc=26.45%, D(t)=0.2222]
+Validating: 100% 79/79 [00:10<00:00,  7.37it/s]
+Train Loss: 3.5139 | Train Acc: 26.45%
+Val   Loss: 2.8620 | Val   Acc: 37.57%
+Dopamine D(t): 0.222196
+  *** New best val acc: 37.57% (Saved as dsit_best_epoch22_acc37.57.pth) ***
+
+============================================================
+Epoch 23/100  |  LR: 0.000957
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=3.4856, acc=27.04%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.41it/s]
+Train Loss: 3.4856 | Train Acc: 27.04%
+Val   Loss: 2.8327 | Val   Acc: 37.68%
+Dopamine D(t): 0.000000
+  *** New best val acc: 37.68% (Saved as dsit_best_epoch23_acc37.68.pth) ***
+
+============================================================
+Epoch 24/100  |  LR: 0.000950
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=3.4820, acc=26.94%, D(t)=0.0330]
+Validating: 100% 79/79 [00:10<00:00,  7.46it/s]
+Train Loss: 3.4820 | Train Acc: 26.94%
+Val   Loss: 2.7963 | Val   Acc: 38.84%
+Dopamine D(t): 0.032995
+  *** New best val acc: 38.84% (Saved as dsit_best_epoch24_acc38.84.pth) ***
+
+============================================================
+Epoch 25/100  |  LR: 0.000942
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.4479, acc=27.95%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.38it/s]
+Train Loss: 3.4479 | Train Acc: 27.95%
+Val   Loss: 2.7704 | Val   Acc: 40.33%
+Dopamine D(t): 0.000000
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+  *** New best val acc: 40.33% (Saved as dsit_best_epoch25_acc40.33.pth) ***
+
+============================================================
+Epoch 26/100  |  LR: 0.000934
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.3795, acc=28.84%, D(t)=0.0271]
+Validating: 100% 79/79 [00:10<00:00,  7.40it/s]
+Train Loss: 3.3795 | Train Acc: 28.84%
+Val   Loss: 2.7633 | Val   Acc: 39.95%
+Dopamine D(t): 0.027104
+
+============================================================
+Epoch 27/100  |  LR: 0.000925
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.4240, acc=29.04%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.43it/s]
+Train Loss: 3.4240 | Train Acc: 29.04%
+Val   Loss: 2.7394 | Val   Acc: 40.92%
+Dopamine D(t): 0.000000
+  *** New best val acc: 40.92% (Saved as dsit_best_epoch27_acc40.92.pth) ***
+
+============================================================
+Epoch 28/100  |  LR: 0.000915
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.4088, acc=28.90%, D(t)=0.1312]
+Validating: 100% 79/79 [00:10<00:00,  7.41it/s]
+Train Loss: 3.4088 | Train Acc: 28.90%
+Val   Loss: 2.7364 | Val   Acc: 40.88%
+Dopamine D(t): 0.131175
+
+============================================================
+Epoch 29/100  |  LR: 0.000905
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.75it/s, loss=3.3416, acc=29.94%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.39it/s]
+Train Loss: 3.3416 | Train Acc: 29.94%
+Val   Loss: 2.6967 | Val   Acc: 41.56%
+Dopamine D(t): 0.000000
+  *** New best val acc: 41.56% (Saved as dsit_best_epoch29_acc41.56.pth) ***
+
+============================================================
+Epoch 30/100  |  LR: 0.000895
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=3.3714, acc=30.22%, D(t)=0.2374]
+Validating: 100% 79/79 [00:10<00:00,  7.42it/s]
+Train Loss: 3.3714 | Train Acc: 30.22%
+Val   Loss: 2.7185 | Val   Acc: 40.51%
+Dopamine D(t): 0.237415
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+
+============================================================
+Epoch 31/100  |  LR: 0.000884
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.73it/s, loss=3.3450, acc=30.84%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.35it/s]
+Train Loss: 3.3450 | Train Acc: 30.84%
+Val   Loss: 2.6569 | Val   Acc: 43.10%
+Dopamine D(t): 0.000000
+  *** New best val acc: 43.10% (Saved as dsit_best_epoch31_acc43.10.pth) ***
+
+============================================================
+Epoch 32/100  |  LR: 0.000873
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.73it/s, loss=3.3465, acc=31.00%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.49it/s]
+Train Loss: 3.3465 | Train Acc: 31.00%
+Val   Loss: 2.6916 | Val   Acc: 42.65%
+Dopamine D(t): 0.000000
+
+============================================================
+Epoch 33/100  |  LR: 0.000861
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.2982, acc=31.79%, D(t)=0.0223]
+Validating: 100% 79/79 [00:10<00:00,  7.38it/s]
+Train Loss: 3.2982 | Train Acc: 31.79%
+Val   Loss: 2.6485 | Val   Acc: 43.77%
+Dopamine D(t): 0.022323
+  *** New best val acc: 43.77% (Saved as dsit_best_epoch33_acc43.77.pth) ***
+
+============================================================
+Epoch 34/100  |  LR: 0.000849
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.2823, acc=32.51%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.32it/s]
+Train Loss: 3.2823 | Train Acc: 32.51%
+Val   Loss: 2.6164 | Val   Acc: 44.51%
+Dopamine D(t): 0.000000
+  *** New best val acc: 44.51% (Saved as dsit_best_epoch34_acc44.51.pth) ***
+
+============================================================
+Epoch 35/100  |  LR: 0.000836
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=3.3185, acc=32.23%, D(t)=0.0783]
+Validating: 100% 79/79 [00:10<00:00,  7.51it/s]
+Train Loss: 3.3185 | Train Acc: 32.23%
+Val   Loss: 2.5980 | Val   Acc: 44.26%
+Dopamine D(t): 0.078314
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+
+============================================================
+Epoch 36/100  |  LR: 0.000823
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.2617, acc=32.95%, D(t)=0.1356]
+Validating: 100% 79/79 [00:10<00:00,  7.40it/s]
+Train Loss: 3.2617 | Train Acc: 32.95%
+Val   Loss: 2.6736 | Val   Acc: 42.54%
+Dopamine D(t): 0.135578
+
+============================================================
+Epoch 37/100  |  LR: 0.000810
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=3.3173, acc=32.64%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.38it/s]
+Train Loss: 3.3173 | Train Acc: 32.64%
+Val   Loss: 2.5650 | Val   Acc: 45.54%
+Dopamine D(t): 0.000000
+  *** New best val acc: 45.54% (Saved as dsit_best_epoch37_acc45.54.pth) ***
+
+============================================================
+Epoch 38/100  |  LR: 0.000796
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.2488, acc=33.68%, D(t)=0.0497]
+Validating: 100% 79/79 [00:10<00:00,  7.36it/s]
+Train Loss: 3.2488 | Train Acc: 33.68%
+Val   Loss: 2.5883 | Val   Acc: 44.61%
+Dopamine D(t): 0.049655
+
+============================================================
+Epoch 39/100  |  LR: 0.000782
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.2430, acc=33.74%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.42it/s]
+Train Loss: 3.2430 | Train Acc: 33.74%
+Val   Loss: 2.5752 | Val   Acc: 45.16%
+Dopamine D(t): 0.000000
+
+============================================================
+Epoch 40/100  |  LR: 0.000767
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.2250, acc=34.07%, D(t)=0.1380]
+Validating: 100% 79/79 [00:10<00:00,  7.44it/s]
+Train Loss: 3.2250 | Train Acc: 34.07%
+Val   Loss: 2.5778 | Val   Acc: 45.08%
+Dopamine D(t): 0.137994
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+
+============================================================
+Epoch 41/100  |  LR: 0.000753
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=3.1478, acc=35.62%, D(t)=0.0267]
+Validating: 100% 79/79 [00:10<00:00,  7.46it/s]
+Train Loss: 3.1478 | Train Acc: 35.62%
+Val   Loss: 2.5255 | Val   Acc: 47.10%
+Dopamine D(t): 0.026675
+  *** New best val acc: 47.10% (Saved as dsit_best_epoch41_acc47.10.pth) ***
+
+============================================================
+Epoch 42/100  |  LR: 0.000737
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.1569, acc=35.23%, D(t)=0.0424]
+Validating: 100% 79/79 [00:10<00:00,  7.31it/s]
+Train Loss: 3.1569 | Train Acc: 35.23%
+Val   Loss: 2.5352 | Val   Acc: 46.60%
+Dopamine D(t): 0.042428
+
+============================================================
+Epoch 43/100  |  LR: 0.000722
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.75it/s, loss=3.2526, acc=34.35%, D(t)=0.3727]
+Validating: 100% 79/79 [00:10<00:00,  7.35it/s]
+Train Loss: 3.2526 | Train Acc: 34.35%
+Val   Loss: 2.6309 | Val   Acc: 43.80%
+Dopamine D(t): 0.372722
+
+============================================================
+Epoch 44/100  |  LR: 0.000706
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.1892, acc=35.04%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.42it/s]
+Train Loss: 3.1892 | Train Acc: 35.04%
+Val   Loss: 2.5530 | Val   Acc: 45.44%
+Dopamine D(t): 0.000000
+
+============================================================
+Epoch 45/100  |  LR: 0.000690
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=3.1883, acc=35.40%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.36it/s]
+Train Loss: 3.1883 | Train Acc: 35.40%
+Val   Loss: 2.4717 | Val   Acc: 48.09%
+Dopamine D(t): 0.000000
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+  *** New best val acc: 48.09% (Saved as dsit_best_epoch45_acc48.09.pth) ***
+
+============================================================
+Epoch 46/100  |  LR: 0.000674
+============================================================
+Training: 100% 390/390 [02:20<00:00,  2.77it/s, loss=3.1758, acc=35.99%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.34it/s]
+Train Loss: 3.1758 | Train Acc: 35.99%
+Val   Loss: 2.4934 | Val   Acc: 47.96%
+Dopamine D(t): 0.000000
+
+============================================================
+Epoch 47/100  |  LR: 0.000658
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=3.1470, acc=36.54%, D(t)=0.2851]
+Validating: 100% 79/79 [00:10<00:00,  7.23it/s]
+Train Loss: 3.1470 | Train Acc: 36.54%
+Val   Loss: 2.5522 | Val   Acc: 45.45%
+Dopamine D(t): 0.285081
+
+============================================================
+Epoch 48/100  |  LR: 0.000641
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.1539, acc=36.52%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.36it/s]
+Train Loss: 3.1539 | Train Acc: 36.52%
+Val   Loss: 2.4659 | Val   Acc: 48.25%
+Dopamine D(t): 0.000000
+  *** New best val acc: 48.25% (Saved as dsit_best_epoch48_acc48.25.pth) ***
+
+============================================================
+Epoch 49/100  |  LR: 0.000625
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.1626, acc=36.72%, D(t)=0.0747]
+Validating: 100% 79/79 [00:10<00:00,  7.31it/s]
+Train Loss: 3.1626 | Train Acc: 36.72%
+Val   Loss: 2.4315 | Val   Acc: 49.37%
+Dopamine D(t): 0.074721
+  *** New best val acc: 49.37% (Saved as dsit_best_epoch49_acc49.37.pth) ***
+
+============================================================
+Epoch 50/100  |  LR: 0.000608
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=3.1463, acc=37.06%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.24it/s]
+Train Loss: 3.1463 | Train Acc: 37.06%
+Val   Loss: 2.4468 | Val   Acc: 48.73%
+Dopamine D(t): 0.000000
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+
+============================================================
+Epoch 51/100  |  LR: 0.000591
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.1209, acc=37.18%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.43it/s]
+Train Loss: 3.1209 | Train Acc: 37.18%
+Val   Loss: 2.4541 | Val   Acc: 48.40%
+Dopamine D(t): 0.000000
+
+============================================================
+Epoch 52/100  |  LR: 0.000574
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.1119, acc=37.26%, D(t)=0.2215]
+Validating: 100% 79/79 [00:10<00:00,  7.38it/s]
+Train Loss: 3.1119 | Train Acc: 37.26%
+Val   Loss: 2.4469 | Val   Acc: 48.85%
+Dopamine D(t): 0.221486
+
+============================================================
+Epoch 53/100  |  LR: 0.000557
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=3.0820, acc=38.46%, D(t)=0.3023]
+Validating: 100% 79/79 [00:10<00:00,  7.44it/s]
+Train Loss: 3.0820 | Train Acc: 38.46%
+Val   Loss: 2.5408 | Val   Acc: 47.02%
+Dopamine D(t): 0.302321
+
+============================================================
+Epoch 54/100  |  LR: 0.000540
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.0965, acc=38.11%, D(t)=0.6216]
+Validating: 100% 79/79 [00:10<00:00,  7.42it/s]
+Train Loss: 3.0965 | Train Acc: 38.11%
+Val   Loss: 2.7085 | Val   Acc: 42.26%
+Dopamine D(t): 0.621568
+
+============================================================
+Epoch 55/100  |  LR: 0.000522
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=3.0847, acc=38.20%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.29it/s]
+Train Loss: 3.0847 | Train Acc: 38.20%
+Val   Loss: 2.4216 | Val   Acc: 49.66%
+Dopamine D(t): 0.000000
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+  *** New best val acc: 49.66% (Saved as dsit_best_epoch55_acc49.66.pth) ***
+
+============================================================
+Epoch 56/100  |  LR: 0.000505
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.73it/s, loss=3.1020, acc=38.33%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.35it/s]
+Train Loss: 3.1020 | Train Acc: 38.33%
+Val   Loss: 2.3973 | Val   Acc: 50.51%
+Dopamine D(t): 0.000000
+  *** New best val acc: 50.51% (Saved as dsit_best_epoch56_acc50.51.pth) ***
+
+============================================================
+Epoch 57/100  |  LR: 0.000488
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.0544, acc=39.17%, D(t)=0.1387]
+Validating: 100% 79/79 [00:10<00:00,  7.41it/s]
+Train Loss: 3.0544 | Train Acc: 39.17%
+Val   Loss: 2.3948 | Val   Acc: 50.47%
+Dopamine D(t): 0.138706
+
+============================================================
+Epoch 58/100  |  LR: 0.000470
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.0646, acc=39.35%, D(t)=0.1173]
+Validating: 100% 79/79 [00:10<00:00,  7.33it/s]
+Train Loss: 3.0646 | Train Acc: 39.35%
+Val   Loss: 2.4061 | Val   Acc: 50.15%
+Dopamine D(t): 0.117302
+
+============================================================
+Epoch 59/100  |  LR: 0.000453
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.0385, acc=39.70%, D(t)=0.6751]
+Validating: 100% 79/79 [00:10<00:00,  7.37it/s]
+Train Loss: 3.0385 | Train Acc: 39.70%
+Val   Loss: 2.6880 | Val   Acc: 42.82%
+Dopamine D(t): 0.675081
+
+============================================================
+Epoch 60/100  |  LR: 0.000436
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=3.0597, acc=39.36%, D(t)=0.0308]
+Validating: 100% 79/79 [00:10<00:00,  7.31it/s]
+Train Loss: 3.0597 | Train Acc: 39.36%
+Val   Loss: 2.3629 | Val   Acc: 51.01%
+Dopamine D(t): 0.030845
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+  *** New best val acc: 51.01% (Saved as dsit_best_epoch60_acc51.01.pth) ***
+
+============================================================
+Epoch 61/100  |  LR: 0.000419
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.0539, acc=39.58%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.40it/s]
+Train Loss: 3.0539 | Train Acc: 39.58%
+Val   Loss: 2.3627 | Val   Acc: 51.20%
+Dopamine D(t): 0.000000
+  *** New best val acc: 51.20% (Saved as dsit_best_epoch61_acc51.20.pth) ***
+
+============================================================
+Epoch 62/100  |  LR: 0.000402
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=3.0531, acc=39.98%, D(t)=0.4092]
+Validating: 100% 79/79 [00:10<00:00,  7.36it/s]
+Train Loss: 3.0531 | Train Acc: 39.98%
+Val   Loss: 2.5555 | Val   Acc: 46.07%
+Dopamine D(t): 0.409215
+
+============================================================
+Epoch 63/100  |  LR: 0.000385
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.0172, acc=41.10%, D(t)=0.2428]
+Validating: 100% 79/79 [00:10<00:00,  7.37it/s]
+Train Loss: 3.0172 | Train Acc: 41.10%
+Val   Loss: 2.4148 | Val   Acc: 50.33%
+Dopamine D(t): 0.242756
+
+============================================================
+Epoch 64/100  |  LR: 0.000369
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.75it/s, loss=3.0088, acc=40.29%, D(t)=0.4043]
+Validating: 100% 79/79 [00:10<00:00,  7.40it/s]
+Train Loss: 3.0088 | Train Acc: 40.29%
+Val   Loss: 2.5520 | Val   Acc: 46.09%
+Dopamine D(t): 0.404264
+
+============================================================
+Epoch 65/100  |  LR: 0.000352
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.0162, acc=40.86%, D(t)=0.4948]
+Validating: 100% 79/79 [00:10<00:00,  7.44it/s]
+Train Loss: 3.0162 | Train Acc: 40.86%
+Val   Loss: 2.5812 | Val   Acc: 45.54%
+Dopamine D(t): 0.494847
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+
+============================================================
+Epoch 66/100  |  LR: 0.000336
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=3.0011, acc=40.73%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.44it/s]
+Train Loss: 3.0011 | Train Acc: 40.73%
+Val   Loss: 2.3716 | Val   Acc: 51.00%
+Dopamine D(t): 0.000000
+
+============================================================
+Epoch 67/100  |  LR: 0.000320
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.73it/s, loss=3.0005, acc=41.37%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.37it/s]
+Train Loss: 3.0005 | Train Acc: 41.37%
+Val   Loss: 2.3933 | Val   Acc: 51.19%
+Dopamine D(t): 0.000000
+
+============================================================
+Epoch 68/100  |  LR: 0.000304
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=2.9665, acc=41.70%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.35it/s]
+Train Loss: 2.9665 | Train Acc: 41.70%
+Val   Loss: 2.3016 | Val   Acc: 53.20%
+Dopamine D(t): 0.000000
+  *** New best val acc: 53.20% (Saved as dsit_best_epoch68_acc53.20.pth) ***
+
+============================================================
+Epoch 69/100  |  LR: 0.000288
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=2.9924, acc=41.58%, D(t)=0.1758]
+Validating: 100% 79/79 [00:10<00:00,  7.44it/s]
+Train Loss: 2.9924 | Train Acc: 41.58%
+Val   Loss: 2.3083 | Val   Acc: 52.88%
+Dopamine D(t): 0.175772
+
+============================================================
+Epoch 70/100  |  LR: 0.000273
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=2.9513, acc=42.15%, D(t)=0.0091]
+Validating: 100% 79/79 [00:10<00:00,  7.40it/s]
+Train Loss: 2.9513 | Train Acc: 42.15%
+Val   Loss: 2.3525 | Val   Acc: 51.61%
+Dopamine D(t): 0.009081
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+
+============================================================
+Epoch 71/100  |  LR: 0.000258
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.0009, acc=41.35%, D(t)=0.2658]
+Validating: 100% 79/79 [00:10<00:00,  7.41it/s]
+Train Loss: 3.0009 | Train Acc: 41.35%
+Val   Loss: 2.3823 | Val   Acc: 50.83%
+Dopamine D(t): 0.265790
+
+============================================================
+Epoch 72/100  |  LR: 0.000243
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=2.9891, acc=41.59%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.33it/s]
+Train Loss: 2.9891 | Train Acc: 41.59%
+Val   Loss: 2.3432 | Val   Acc: 52.21%
+Dopamine D(t): 0.000000
+
+============================================================
+Epoch 73/100  |  LR: 0.000228
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=2.9961, acc=41.90%, D(t)=0.0424]
+Validating: 100% 79/79 [00:10<00:00,  7.36it/s]
+Train Loss: 2.9961 | Train Acc: 41.90%
+Val   Loss: 2.2801 | Val   Acc: 53.91%
+Dopamine D(t): 0.042425
+  *** New best val acc: 53.91% (Saved as dsit_best_epoch73_acc53.91.pth) ***
+
+============================================================
+Epoch 74/100  |  LR: 0.000214
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=2.9095, acc=42.73%, D(t)=0.8689]
+Validating: 100% 79/79 [00:10<00:00,  7.41it/s]
+Train Loss: 2.9095 | Train Acc: 42.73%
+Val   Loss: 2.6236 | Val   Acc: 44.55%
+Dopamine D(t): 0.868878
+
+============================================================
+Epoch 75/100  |  LR: 0.000200
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=2.9121, acc=43.25%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.39it/s]
+Train Loss: 2.9121 | Train Acc: 43.25%
+Val   Loss: 2.3049 | Val   Acc: 53.15%
+Dopamine D(t): 0.000000
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+
+============================================================
+Epoch 76/100  |  LR: 0.000187
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=2.9456, acc=42.68%, D(t)=0.0260]
+Validating: 100% 79/79 [00:10<00:00,  7.44it/s]
+Train Loss: 2.9456 | Train Acc: 42.68%
+Val   Loss: 2.3080 | Val   Acc: 53.21%
+Dopamine D(t): 0.026034
+
+============================================================
+Epoch 77/100  |  LR: 0.000174
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=2.9265, acc=43.69%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.41it/s]
+Train Loss: 2.9265 | Train Acc: 43.69%
+Val   Loss: 2.3376 | Val   Acc: 52.24%
+Dopamine D(t): 0.000000
+
+============================================================
+Epoch 78/100  |  LR: 0.000161
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=2.9621, acc=42.87%, D(t)=0.0200]
+Validating: 100% 79/79 [00:10<00:00,  7.36it/s]
+Train Loss: 2.9621 | Train Acc: 42.87%
+Val   Loss: 2.3203 | Val   Acc: 52.95%
+Dopamine D(t): 0.020003
+
+============================================================
+Epoch 79/100  |  LR: 0.000149
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=2.9593, acc=42.55%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.37it/s]
+Train Loss: 2.9593 | Train Acc: 42.55%
+Val   Loss: 2.2918 | Val   Acc: 53.60%
+Dopamine D(t): 0.000000
+
+============================================================
+Epoch 80/100  |  LR: 0.000137
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=2.9505, acc=42.99%, D(t)=0.9036]
+Validating: 100% 79/79 [00:10<00:00,  7.39it/s]
+Train Loss: 2.9505 | Train Acc: 42.99%
+Val   Loss: 2.7020 | Val   Acc: 43.29%
+Dopamine D(t): 0.903588
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+
+============================================================
+Epoch 81/100  |  LR: 0.000126
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=2.9339, acc=43.39%, D(t)=0.4938]
+Validating: 100% 79/79 [00:10<00:00,  7.45it/s]
+Train Loss: 2.9339 | Train Acc: 43.39%
+Val   Loss: 2.5669 | Val   Acc: 46.31%
+Dopamine D(t): 0.493778
+
+============================================================
+Epoch 82/100  |  LR: 0.000115
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=2.8749, acc=43.89%, D(t)=0.2825]
+Validating: 100% 79/79 [00:10<00:00,  7.45it/s]
+Train Loss: 2.8749 | Train Acc: 43.89%
+Val   Loss: 2.2935 | Val   Acc: 53.66%
+Dopamine D(t): 0.282471
+
+============================================================
+Epoch 83/100  |  LR: 0.000105
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.77it/s, loss=2.9162, acc=43.57%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.38it/s]
+Train Loss: 2.9162 | Train Acc: 43.57%
+Val   Loss: 2.2845 | Val   Acc: 54.05%
+Dopamine D(t): 0.000000
+  *** New best val acc: 54.05% (Saved as dsit_best_epoch83_acc54.05.pth) ***
+
+============================================================
+Epoch 84/100  |  LR: 0.000095
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=2.8609, acc=45.18%, D(t)=0.1459]
+Validating: 100% 79/79 [00:10<00:00,  7.39it/s]
+Train Loss: 2.8609 | Train Acc: 45.18%
+Val   Loss: 2.2329 | Val   Acc: 55.02%
+Dopamine D(t): 0.145940
+  *** New best val acc: 55.02% (Saved as dsit_best_epoch84_acc55.02.pth) ***
+
+============================================================
+Epoch 85/100  |  LR: 0.000085
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=2.9163, acc=44.10%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.43it/s]
+Train Loss: 2.9163 | Train Acc: 44.10%
+Val   Loss: 2.3110 | Val   Acc: 53.26%
+Dopamine D(t): 0.000000
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+
+============================================================
+Epoch 86/100  |  LR: 0.000076
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=2.9090, acc=44.28%, D(t)=0.2070]
+Validating: 100% 79/79 [00:10<00:00,  7.43it/s]
+Train Loss: 2.9090 | Train Acc: 44.28%
+Val   Loss: 2.2589 | Val   Acc: 54.64%
+Dopamine D(t): 0.206982
+
+============================================================
+Epoch 87/100  |  LR: 0.000068
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=2.8731, acc=45.06%, D(t)=0.7353]
+Validating: 100% 79/79 [00:10<00:00,  7.44it/s]
+Train Loss: 2.8731 | Train Acc: 45.06%
+Val   Loss: 2.7168 | Val   Acc: 42.50%
+Dopamine D(t): 0.735261
+
+============================================================
+Epoch 88/100  |  LR: 0.000060
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=2.8785, acc=44.51%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.39it/s]
+Train Loss: 2.8785 | Train Acc: 44.51%
+Val   Loss: 2.2680 | Val   Acc: 54.23%
+Dopamine D(t): 0.000000
+
+============================================================
+Epoch 89/100  |  LR: 0.000053
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=2.9232, acc=43.99%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.31it/s]
+Train Loss: 2.9232 | Train Acc: 43.99%
+Val   Loss: 2.2871 | Val   Acc: 53.81%
+Dopamine D(t): 0.000000
+
+============================================================
+Epoch 90/100  |  LR: 0.000046
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=2.8990, acc=44.35%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.35it/s]
+Train Loss: 2.8990 | Train Acc: 44.35%
+Val   Loss: 2.2566 | Val   Acc: 54.82%
+Dopamine D(t): 0.000000
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+
+============================================================
+Epoch 91/100  |  LR: 0.000040
+============================================================
+Training: 100% 390/390 [02:20<00:00,  2.77it/s, loss=2.8943, acc=44.65%, D(t)=0.4393]
+Validating: 100% 79/79 [00:10<00:00,  7.42it/s]
+Train Loss: 2.8943 | Train Acc: 44.65%
+Val   Loss: 2.5274 | Val   Acc: 47.23%
+Dopamine D(t): 0.439317
+
+============================================================
+Epoch 92/100  |  LR: 0.000034
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=2.8649, acc=44.71%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.39it/s]
+Train Loss: 2.8649 | Train Acc: 44.71%
+Val   Loss: 2.2488 | Val   Acc: 54.58%
+Dopamine D(t): 0.000000
+
+============================================================
+Epoch 93/100  |  LR: 0.000029
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=2.8495, acc=45.29%, D(t)=0.6407]
+Validating: 100% 79/79 [00:10<00:00,  7.49it/s]
+Train Loss: 2.8495 | Train Acc: 45.29%
+Val   Loss: 2.5503 | Val   Acc: 46.82%
+Dopamine D(t): 0.640650
+
+============================================================
+Epoch 94/100  |  LR: 0.000025
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=2.8811, acc=45.17%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.41it/s]
+Train Loss: 2.8811 | Train Acc: 45.17%
+Val   Loss: 2.3234 | Val   Acc: 52.81%
+Dopamine D(t): 0.000000
+
+============================================================
+Epoch 95/100  |  LR: 0.000021
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=2.8437, acc=45.32%, D(t)=0.4914]
+Validating: 100% 79/79 [00:10<00:00,  7.37it/s]
+Train Loss: 2.8437 | Train Acc: 45.32%
+Val   Loss: 2.5967 | Val   Acc: 45.53%
+Dopamine D(t): 0.491403
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+
+============================================================
+Epoch 96/100  |  LR: 0.000018
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=2.8329, acc=45.70%, D(t)=0.2671]
+Validating: 100% 79/79 [00:10<00:00,  7.38it/s]
+Train Loss: 2.8329 | Train Acc: 45.70%
+Val   Loss: 2.2781 | Val   Acc: 54.09%
+Dopamine D(t): 0.267087
+
+============================================================
+Epoch 97/100  |  LR: 0.000015
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.76it/s, loss=2.8798, acc=44.57%, D(t)=0.4855]
+Validating: 100% 79/79 [00:10<00:00,  7.37it/s]
+Train Loss: 2.8798 | Train Acc: 44.57%
+Val   Loss: 2.5610 | Val   Acc: 46.37%
+Dopamine D(t): 0.485517
+
+============================================================
+Epoch 98/100  |  LR: 0.000013
+============================================================
+Training: 100% 390/390 [02:22<00:00,  2.74it/s, loss=2.8196, acc=45.85%, D(t)=0.3184]
+Validating: 100% 79/79 [00:10<00:00,  7.31it/s]
+Train Loss: 2.8196 | Train Acc: 45.85%
+Val   Loss: 2.3602 | Val   Acc: 51.35%
+Dopamine D(t): 0.318389
+
+============================================================
+Epoch 99/100  |  LR: 0.000011
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=2.8923, acc=44.50%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.43it/s]
+Train Loss: 2.8923 | Train Acc: 44.50%
+Val   Loss: 2.2743 | Val   Acc: 54.28%
+Dopamine D(t): 0.000000
+
+============================================================
+Epoch 100/100  |  LR: 0.000010
+============================================================
+Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=2.8852, acc=45.02%, D(t)=0.0000]
+Validating: 100% 79/79 [00:10<00:00,  7.36it/s]
+Train Loss: 2.8852 | Train Acc: 45.02%
+Val   Loss: 2.2412 | Val   Acc: 55.51%
+Dopamine D(t): 0.000000
+Head Pruning Status:
+  Block  0: 8/8 heads alive
+  Block  1: 8/8 heads alive
+  Block  2: 8/8 heads alive
+  Block  3: 8/8 heads alive
+  Block  4: 8/8 heads alive
+  Block  5: 8/8 heads alive
+  Block  6: 8/8 heads alive
+  Block  7: 8/8 heads alive
+  Total: 64/64 heads alive (100.0%)
+  *** New best val acc: 55.51% (Saved as dsit_best_epoch100_acc55.51.pth) ***
+
+Training complete. Best val acc: 55.51%

@@ -146,8 +146,8 @@ class DSITBlock(nn.Module):
         super().__init__()
         self.attn = HeterogeneousSpikingSelfAttention(embed_dim, num_heads)
         self.mlp = SpikingMLP(embed_dim, int(embed_dim * mlp_ratio))
-        # ReZero: learnable scale on the branch, initialized very small to prevent overfitting
-        self.res_scale = nn.Parameter(torch.tensor(0.01))
+        # ReZero: learnable scale, 0.1 lets blocks contribute meaningfully while still stable
+        self.res_scale = nn.Parameter(torch.tensor(0.1))
 
     def reset_state(self):
         self.attn.reset_state()
@@ -187,6 +187,14 @@ class DSIT(nn.Module):
         self.depth = depth
         self.stem = SpikingConvStem(in_channels, embed_dim, img_size=img_size)
         self.tokenizer = TimeDelayTokenizer(embed_dim)
+
+        # Learnable 2D positional embedding — tokens are otherwise spatially unaware
+        if img_size >= 224:
+            num_patches = (img_size // 16) ** 2
+        else:
+            num_patches = (img_size // 4) ** 2
+        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches, embed_dim))
+        nn.init.trunc_normal_(self.pos_embed, std=0.02)
 
         self.blocks = nn.ModuleList([
             DSITBlock(embed_dim, num_heads) for _ in range(depth)
@@ -237,7 +245,10 @@ class DSIT(nn.Module):
         # 2. Learnable Time-Delay Tokenizer
         x_seq = self.tokenizer(x_seq)
 
-        # 3. Transformer Blocks
+        # 3. Add positional embedding (broadcast over T and B dimensions)
+        x_seq = x_seq + self.pos_embed.unsqueeze(0)  # (1,1,N,D) broadcasts over (T,B,N,D)
+
+        # 4. Transformer Blocks
         for blk in self.blocks:
             blk.reset_state()
             block_outputs = []
@@ -248,9 +259,9 @@ class DSIT(nn.Module):
                 block_outputs.append(x_t)
             x_seq = torch.stack(block_outputs, dim=0)
 
-        # 4. Spatio-Temporal Average Pooling: (T, B, N, D) -> (B, D)
+        # 5. Spatio-Temporal Average Pooling: (T, B, N, D) -> (B, D)
         x_pool = x_seq.mean(dim=(0, 2))
 
-        # 5. Classifier
+        # 6. Classifier
         logits = self.head(x_pool)
         return logits

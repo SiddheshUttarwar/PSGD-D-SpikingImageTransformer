@@ -12,7 +12,7 @@ class IntrinsicDopamineTracker:
     V[t] = beta * V[t-1] + (1 - beta) * R[t]
     D[t] = R[t] - V[t-1]
     """
-    def __init__(self, beta=0.9):
+    def __init__(self, beta=0.7):
         self.beta = beta
         self.V_t = 0.0
         self.prev_H = None
@@ -45,8 +45,9 @@ class IntrinsicDopamineTracker:
             self.V_t = self.beta * self.V_t + (1.0 - self.beta) * R_t
 
     def get_D(self):
-        # Bound D > 0 to prevent division by zero in DA-PSG (1 + kappa * D)
-        return max(0.0, self.current_D)
+        # Clip to [0, 0.3]: values above this consistently cause catastrophic val drops
+        # (observed: D>0.5 correlates with 8-13% accuracy crashes due to DAPSG alpha collapse)
+        return max(0.0, min(self.current_D, 0.3))
 
 
 class DAPSG(torch.autograd.Function):

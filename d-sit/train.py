@@ -13,21 +13,42 @@ from optimizer import ProximalAdamW
 
 
 # ---------------------------------------------------------------------------
-# MixUp Regularization Utilities
+# MixUp + CutMix Regularization Utilities
 # ---------------------------------------------------------------------------
 def mixup_data(x, y, alpha=1.0):
-    """Returns mixed inputs, pairs of targets, and lambda"""
     if alpha > 0:
         lam = torch.distributions.beta.Beta(alpha, alpha).sample().item()
     else:
         lam = 1.0
-    batch_size = x.size()[0]
-    index = torch.randperm(batch_size, device=x.device)
-    mixed_x = lam * x + (1 - lam) * x[index, :]
-    y_a, y_b = y, y[index]
-    return mixed_x, y_a, y_b, lam
+    index = torch.randperm(x.size(0), device=x.device)
+    mixed_x = lam * x + (1 - lam) * x[index]
+    return mixed_x, y, y[index], lam
 
-def mixup_criterion(criterion, pred, y_a, y_b, lam):
+
+def cutmix_data(x, y, alpha=1.0):
+    if alpha > 0:
+        lam = torch.distributions.beta.Beta(alpha, alpha).sample().item()
+    else:
+        lam = 1.0
+    B, C, H, W = x.shape
+    index = torch.randperm(B, device=x.device)
+
+    cut_ratio = (1.0 - lam) ** 0.5
+    cut_h, cut_w = int(H * cut_ratio), int(W * cut_ratio)
+    cy = torch.randint(H, (1,)).item()
+    cx = torch.randint(W, (1,)).item()
+    y1 = max(cy - cut_h // 2, 0)
+    y2 = min(cy + cut_h // 2, H)
+    x1 = max(cx - cut_w // 2, 0)
+    x2 = min(cx + cut_w // 2, W)
+
+    x = x.clone()
+    x[:, :, y1:y2, x1:x2] = x[index, :, y1:y2, x1:x2]
+    lam = 1.0 - (y2 - y1) * (x2 - x1) / (H * W)
+    return x, y, y[index], lam
+
+
+def mixed_criterion(criterion, pred, y_a, y_b, lam):
     return lam * criterion(pred, y_a) + (1 - lam) * criterion(pred, y_b)
 
 # ---------------------------------------------------------------------------
@@ -46,16 +67,22 @@ def train_epoch(model, dataloader, optimizer, criterion, scaler, device, accum_s
         images = batch['image'].to(device, non_blocking=True)
         labels = batch['label'].to(device, non_blocking=True)
 
-        # Forward with optional MixUp
-        use_mixup = torch.rand(1).item() < 0.5
-        if use_mixup:
+        # Augmentation: MixUp (33%), CutMix (33%), plain (34%)
+        r = torch.rand(1).item()
+        if r < 0.33:
             images, y_a, y_b, lam = mixup_data(images, labels, alpha=1.0)
+            use_mixed = True
+        elif r < 0.66:
+            images, y_a, y_b, lam = cutmix_data(images, labels, alpha=1.0)
+            use_mixed = True
+        else:
+            use_mixed = False
 
-        # Forward pass (AMP disabled by default — custom DAPSG autograd produces NaN in float16)
+        # Forward pass (AMP disabled — custom DAPSG autograd produces NaN in float16)
         with torch.amp.autocast('cuda', enabled=use_amp):
             logits = model(images)
-            if use_mixup:
-                loss = mixup_criterion(criterion, logits, y_a, y_b, lam) / accum_steps
+            if use_mixed:
+                loss = mixed_criterion(criterion, logits, y_a, y_b, lam) / accum_steps
             else:
                 loss = criterion(logits, labels) / accum_steps
 
@@ -75,8 +102,8 @@ def train_epoch(model, dataloader, optimizer, criterion, scaler, device, accum_s
         # Metrics
         total_loss += loss.item() * accum_steps
         preds = logits.argmax(dim=1)
-        if use_mixup:
-            target_label = y_a if lam > 0.5 else y_b
+        if use_mixed:
+            target_label = y_a if lam >= 0.5 else y_b
             correct += (preds == target_label).sum().item()
         else:
             correct += (preds == labels).sum().item()
@@ -129,14 +156,26 @@ def validate(model, dataloader, criterion, device):
 # ---------------------------------------------------------------------------
 def make_collate_fn(img_size=224):
     """Create a collate function that resizes images to the specified size."""
-    transform = transforms.Compose([
-        transforms.Resize((img_size, img_size)),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomCrop(img_size, padding=4) if img_size <= 64 else transforms.RandomResizedCrop(img_size),
-        transforms.AutoAugment(transforms.AutoAugmentPolicy.CIFAR10),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
+    if img_size <= 64:
+        train_aug = transforms.Compose([
+            transforms.Resize((img_size, img_size)),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(img_size, padding=img_size // 8),
+            transforms.RandAugment(num_ops=2, magnitude=9),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            transforms.RandomErasing(p=0.25, scale=(0.02, 0.2)),
+        ])
+    else:
+        train_aug = transforms.Compose([
+            transforms.RandomResizedCrop(img_size),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandAugment(num_ops=2, magnitude=9),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            transforms.RandomErasing(p=0.25, scale=(0.02, 0.2)),
+        ])
+    transform = train_aug
 
     val_transform = transforms.Compose([
         transforms.Resize((img_size, img_size)),
@@ -194,20 +233,20 @@ def main():
                         help='HuggingFace dataset name (cifar100, imagenet-1k, frgfm/imagenette)')
     parser.add_argument('--img_size', type=int, default=None,
                         help='Input image size (default: 32 for cifar, 224 for imagenet)')
-    parser.add_argument('--batch_size', type=int, default=16,
+    parser.add_argument('--batch_size', type=int, default=64,
                         help='Batch size per step')
     parser.add_argument('--accum_steps', type=int, default=4,
                         help='Gradient accumulation steps (effective batch = batch_size * accum_steps)')
-    parser.add_argument('--epochs', type=int, default=100)
-    parser.add_argument('--lr', type=float, default=1e-3)
-    parser.add_argument('--embed_dim', type=int, default=256,
-                        help='Embedding dimension (256 for CIFAR T4, 768 for ImageNet)')
-    parser.add_argument('--depth', type=int, default=8,
-                        help='Number of transformer blocks (8 for CIFAR T4, 12 for ImageNet)')
+    parser.add_argument('--epochs', type=int, default=300)
+    parser.add_argument('--lr', type=float, default=2e-3)
+    parser.add_argument('--embed_dim', type=int, default=512,
+                        help='Embedding dimension (512 for CIFAR 80%+ target, 768 for ImageNet)')
+    parser.add_argument('--depth', type=int, default=12,
+                        help='Number of transformer blocks (12 for 80%+ target, 8 for quick runs)')
     parser.add_argument('--num_heads', type=int, default=8,
                         help='Number of attention heads (must divide embed_dim)')
-    parser.add_argument('--T', type=int, default=4,
-                        help='Number of simulation timesteps')
+    parser.add_argument('--T', type=int, default=6,
+                        help='Number of simulation timesteps (6 for 80%+ target, 4 for quick runs)')
     parser.add_argument('--prox_lambda', type=float, default=1e-4,
                         help='Proximal sparsity regularization strength')
     parser.add_argument('--resume', type=str, default=None,
@@ -219,7 +258,7 @@ def main():
     # --- Dataset Configuration ---
     if args.dataset == 'cifar100':
         num_classes = 100
-        img_size = args.img_size or 32
+        img_size = args.img_size or 64
         train_split, val_split = 'train', 'test'
     elif 'imagenette' in args.dataset:
         num_classes = 10
@@ -269,12 +308,12 @@ def main():
     optimizer = ProximalAdamW(
         model.parameters(),
         lr=args.lr,
-        weight_decay=5e-4,
+        weight_decay=5e-2,
         prox_lambda=args.prox_lambda,
         num_heads=args.num_heads
     )
     # Warmup + Cosine schedule: critical for SNN to stabilize firing rates early
-    warmup_epochs = min(10, args.epochs // 5)
+    warmup_epochs = min(20, args.epochs // 10)
     warmup_scheduler = torch.optim.lr_scheduler.LinearLR(
         optimizer, start_factor=0.01, end_factor=1.0, total_iters=warmup_epochs
     )
@@ -284,7 +323,7 @@ def main():
     scheduler = torch.optim.lr_scheduler.SequentialLR(
         optimizer, schedulers=[warmup_scheduler, cosine_scheduler], milestones=[warmup_epochs]
     )
-    criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.2)
     scaler = torch.amp.GradScaler('cuda', enabled=args.amp)
     print(f"AMP: {'ENABLED' if args.amp else 'DISABLED (safe mode for custom surrogate gradients)'}")
 
