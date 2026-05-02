@@ -2,40 +2,51 @@ import torch
 import torch.nn as nn
 
 
-class DopamineTracker:
+class IntrinsicDopamineTracker:
     """
-    Tracks the global Dopamine signal D(t) representing the Reward Prediction Error.
-
-    D(t) = E[exp(-gamma * (1 - confidence))]
-
-    When classification error is high (confidence ~ 0), D(t) -> exp(-gamma) ~ 0.
-    When classification is correct (confidence ~ 1), D(t) -> exp(0) = 1.
-    This controls the surrogate width alpha(D) = alpha_base / (1 + kappa * D).
+    Autonomous Dopamine generator using Shannon Entropy to track the
+    network's Intrinsic Reward Prediction Error (RPE).
+    
+    H[t] = - sum(P_c * log(P_c))
+    R[t] = -(H[t] - H[t-1])
+    V[t] = beta * V[t-1] + (1 - beta) * R[t]
+    D[t] = R[t] - V[t-1]
     """
-    def __init__(self, gamma=5.0, ema_decay=0.9):
-        self.gamma = gamma
-        self.ema_decay = ema_decay
+    def __init__(self, beta=0.9):
+        self.beta = beta
+        self.V_t = 0.0
+        self.prev_H = None
         self.current_D = 0.0
 
-    def update(self, R_t, V_hat_t):
+    def update(self, logits: torch.Tensor):
         """
-        R_t: Ground truth label indices (B,)
-        V_hat_t: Model predicted logits (B, num_classes)
+        Calculates dopamine D[t] based on the entropy of the current prediction.
+        Args:
+            logits: Output logits of the classification head.
         """
         with torch.no_grad():
-            probs = torch.softmax(V_hat_t, dim=-1)
-            if R_t.dim() == 1:
-                confidence = probs[torch.arange(probs.size(0), device=probs.device), R_t]
-            else:
-                confidence = (probs * R_t).sum(dim=-1)
-
-            rpe = 1.0 - confidence
-            D = torch.exp(-self.gamma * rpe).mean().item()
-
-            self.current_D = self.ema_decay * self.current_D + (1.0 - self.ema_decay) * D
+            probs = torch.softmax(logits, dim=-1)
+            # H[t] = - sum(P * log(P))
+            entropy = -torch.sum(probs * torch.log(probs + 1e-9), dim=-1).mean().item()
+            
+            if self.prev_H is None:
+                self.prev_H = entropy
+                self.current_D = 0.0
+                return
+                
+            # Intrinsic reward R[t] = -(H[t] - H[t-1])
+            R_t = -(entropy - self.prev_H)
+            self.prev_H = entropy
+            
+            # Dopamine D[t] = R[t] - V[t-1]
+            self.current_D = R_t - self.V_t
+            
+            # Update expected baseline V[t]
+            self.V_t = self.beta * self.V_t + (1.0 - self.beta) * R_t
 
     def get_D(self):
-        return self.current_D
+        # Bound D > 0 to prevent division by zero in DA-PSG (1 + kappa * D)
+        return max(0.0, self.current_D)
 
 
 class DAPSG(torch.autograd.Function):

@@ -162,6 +162,7 @@ def diagnose():
         loss = criterion(logits, labels)
         loss.backward()
         optimizer.step()
+        model2.d_tracker.update(logits.detach())
 
         preds = logits.argmax(dim=1)
         acc = (preds == labels).float().mean().item()

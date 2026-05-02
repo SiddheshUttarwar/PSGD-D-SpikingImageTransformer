@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from neurons import LIFNode, DopamineTracker
+from neurons import LIFNode, IntrinsicDopamineTracker
 from tokenizer import TimeDelayTokenizer
 from attention import HeterogeneousSpikingSelfAttention
 
@@ -193,7 +193,7 @@ class DSIT(nn.Module):
         ])
 
         self.head = nn.Linear(embed_dim, num_classes)
-        self.d_tracker = DopamineTracker()
+        self.d_tracker = IntrinsicDopamineTracker()
 
         # Initialize weights for spiking-friendly distributions
         self._init_weights()

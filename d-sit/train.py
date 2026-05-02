@@ -62,8 +62,8 @@ def train_epoch(model, dataloader, optimizer, criterion, scaler, device, accum_s
         # Backward pass
         scaler.scale(loss).backward()
 
-        # Update Dopamine Tracker based on predictions
-        model.d_tracker.update(labels, logits.detach())
+        # Update Dopamine Tracker based on intrinsic entropy
+        model.d_tracker.update(logits.detach())
 
         if (batch_idx + 1) % accum_steps == 0:
             scaler.unscale_(optimizer)
