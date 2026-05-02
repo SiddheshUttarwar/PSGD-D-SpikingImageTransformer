@@ -64,6 +64,7 @@ class HeterogeneousSpikingSelfAttention(nn.Module):
         self.q_proj = nn.Linear(embed_dim, embed_dim, bias=False)
         self.k_proj = nn.Linear(embed_dim, embed_dim, bias=False)
         self.v_proj = nn.Linear(embed_dim, embed_dim, bias=False)
+        self.dropout = nn.Dropout(0.1)
         self.out_proj = nn.Linear(embed_dim, embed_dim, bias=False)
 
         for proj in [self.q_proj, self.k_proj, self.v_proj, self.out_proj]:
@@ -129,5 +130,6 @@ class HeterogeneousSpikingSelfAttention(nn.Module):
         # Normalize before post-attention LIF to prevent saturation
         x_attn = self.post_attn_bn(x_attn.reshape(B * N, -1)).reshape(B, N, -1)
         attn_spike, _ = self.post_attn_lif(x_attn, d_tracker)
+        attn_spike = self.dropout(attn_spike)
 
         return self.out_proj(attn_spike)

@@ -103,6 +103,7 @@ def make_collate_fn(img_size=224):
         transforms.Resize((img_size, img_size)),
         transforms.RandomHorizontalFlip(),
         transforms.RandomCrop(img_size, padding=4) if img_size <= 64 else transforms.RandomResizedCrop(img_size),
+        transforms.AutoAugment(transforms.AutoAugmentPolicy.CIFAR10),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])

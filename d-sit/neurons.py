@@ -85,10 +85,22 @@ class LIFNode(nn.Module):
         self.decay = 1.0 - (1.0 / tau)  # tau=4 -> decay=0.75
         self.alpha_base = alpha_base
         self.kappa = kappa
+        
+        # Dopamine receptor density and baseline leak
+        self.w_d = nn.Parameter(torch.tensor(0.0))
+        # Initialized so sigmoid(b_lambda) == decay
+        import math
+        init_b = math.log(self.decay / (1.0 - self.decay))
+        self.b_lambda = nn.Parameter(torch.tensor(init_b))
+
         self.u = None
+        self.epsilon = None
+        self.prev_spike = None
 
     def reset_state(self):
         self.u = None
+        self.epsilon = None
+        self.prev_spike = None
 
     def forward(self, x, d_tracker, residual_u=None):
         """
@@ -99,9 +111,22 @@ class LIFNode(nn.Module):
         """
         if self.u is None:
             self.u = torch.zeros_like(x)
+            self.epsilon = torch.zeros_like(x)
+            self.prev_spike = torch.zeros_like(x)
 
-        # Leaky integration (decay old state, add new input)
-        self.u = self.u.detach() * self.decay + x
+        D_t = d_tracker.get_D()
+
+        # Dynamic leak controlled by dopamine
+        lambda_t = torch.sigmoid(self.w_d * D_t + self.b_lambda)
+
+        # Immediate impact: d(lambda)/d(w_d) = lambda * (1 - lambda) * D_t
+        immediate_impact = (self.u * (1.0 - self.prev_spike)) * (lambda_t * (1.0 - lambda_t) * D_t)
+
+        # Update eligibility trace
+        self.epsilon = immediate_impact + lambda_t * self.epsilon
+
+        # Hard reset integration
+        self.u = lambda_t * self.u * (1.0 - self.prev_spike) + x
 
         # Membrane shortcut
         if residual_u is not None:
@@ -111,8 +136,20 @@ class LIFNode(nn.Module):
 
         # Spiking with DA-PSG surrogate
         spike = DAPSG.apply(effective_u, self.v_th, d_tracker, self.alpha_base, self.kappa)
+        self.prev_spike = spike.detach()
 
-        # Soft reset
-        self.u = self.u - spike.detach() * self.v_th.detach()
+        # E-prop Gradient Accumulation
+        # Accumulate the gradient manually so PyTorch optimizer can step without BPTT
+        delta_w_d = D_t * self.epsilon.sum()
+        
+        if self.w_d.grad is None:
+            self.w_d.grad = torch.zeros_like(self.w_d)
+        
+        # PyTorch applies w = w - lr * grad. To do \Delta w_d = \eta * D * \epsilon, we set grad to -delta_w_d.
+        self.w_d.grad -= delta_w_d
+
+        # Fully detach temporal states to eliminate BPTT VRAM overhead!
+        self.u = self.u.detach()
+        self.epsilon = self.epsilon.detach()
 
         return spike, effective_u

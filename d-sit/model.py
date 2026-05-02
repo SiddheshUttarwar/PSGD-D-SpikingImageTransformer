@@ -27,6 +27,10 @@ class SpikingConvStem(nn.Module):
 
         if img_size >= 224:
             self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
+            self.pool_shortcut = nn.Sequential(
+                nn.MaxPool2d(3, stride=2, padding=1),
+                nn.Conv2d(in_channels, 64, kernel_size=1, bias=False)
+            )
             self.bn1 = nn.BatchNorm2d(64)
             self.lif1 = LIFNode()
             self.pool1 = nn.MaxPool2d(2, 2)
@@ -45,6 +49,10 @@ class SpikingConvStem(nn.Module):
         else:
             # CIFAR stem (32x32) -> 8x8 = 64 tokens
             self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=2, padding=1, bias=False)
+            self.pool_shortcut = nn.Sequential(
+                nn.MaxPool2d(3, stride=2, padding=1),
+                nn.Conv2d(in_channels, 64, kernel_size=1, bias=False)
+            )
             self.bn1 = nn.BatchNorm2d(64)
             self.lif1 = LIFNode()
             self.pool1 = nn.MaxPool2d(2, 2)
@@ -72,7 +80,8 @@ class SpikingConvStem(nn.Module):
         x: (B, C, H, W)
         Returns: (B, N, D) at a single timestep
         """
-        x = self.bn1(self.conv1(x))
+        x_pool = self.pool_shortcut(x)
+        x = self.bn1(self.conv1(x) + x_pool)
         s1, _ = self.lif1(x, d_tracker)
         p1 = self.pool1(s1)
 
@@ -103,6 +112,7 @@ class SpikingMLP(nn.Module):
         self.fc2 = nn.Linear(hidden_features, in_features, bias=False)
         self.bn2 = nn.BatchNorm1d(in_features)
         self.lif2 = LIFNode()
+        self.dropout = nn.Dropout(0.1)
 
     def reset_state(self):
         self.lif1.reset_state()
@@ -114,6 +124,7 @@ class SpikingMLP(nn.Module):
         c1 = self.fc1(x)
         c1 = self.bn1(c1.reshape(B * N, -1)).reshape(B, N, -1)
         s1, _ = self.lif1(c1, d_tracker)
+        s1 = self.dropout(s1)
 
         c2 = self.fc2(s1)
         c2 = self.bn2(c2.reshape(B * N, -1)).reshape(B, N, -1)
@@ -135,8 +146,8 @@ class DSITBlock(nn.Module):
         super().__init__()
         self.attn = HeterogeneousSpikingSelfAttention(embed_dim, num_heads)
         self.mlp = SpikingMLP(embed_dim, int(embed_dim * mlp_ratio))
-        # ReZero: learnable scale on the branch, initialized small
-        self.res_scale = nn.Parameter(torch.tensor(0.1))
+        # ReZero: learnable scale on the branch, initialized very small to prevent overfitting
+        self.res_scale = nn.Parameter(torch.tensor(0.01))
 
     def reset_state(self):
         self.attn.reset_state()
