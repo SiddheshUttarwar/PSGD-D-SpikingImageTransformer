@@ -19,7 +19,6 @@ from optimizer import ProximalAdamW
 try:
     import torch_xla.core.xla_model as xm
     import torch_xla.distributed.parallel_loader as pl
-    import torch_xla.distributed.xla_multiprocessing as xmp
     _HAS_XLA = True
 except ImportError:
     _HAS_XLA = False
@@ -484,15 +483,8 @@ def main(args=None):
     log(f"\nTraining complete. Best val acc: {best_val_acc * 100:.2f}%")
 
 
-def _mp_fn(rank, args):
-    """Entry point for each TPU core when spawned by xmp.spawn."""
-    main(args)
-
-
 if __name__ == '__main__':
-    _args = _parse_args()
-    if _HAS_XLA:
-        # Spawns one process per TPU core (8 on v3-8/v4-8); each calls _mp_fn(rank, _args)
-        xmp.spawn(_mp_fn, args=(_args,), start_method='fork')
-    else:
-        main(_args)
+    # On Colab/single-host TPU (PJRT runtime), xmp.spawn causes init errors —
+    # the PJRT runtime handles multi-core internally via xm.mark_step() and
+    # xm.optimizer_step().  Just call main() directly for all backends.
+    main()
