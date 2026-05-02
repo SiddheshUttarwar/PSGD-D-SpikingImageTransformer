@@ -2,7 +2,7 @@
 
 **A Mathematical Framework for Dopamine-Modulated Proximal Surrogate Gradients in Sparsity-Aware Spiking Transformers**
 
-> Siddhesh Uttarwar — Brain-inspired Computing Lab, UC Santa Barbara
+> Siddhesh Uttarwar
 
 ## Overview
 
