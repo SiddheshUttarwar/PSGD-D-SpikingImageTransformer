@@ -13,6 +13,24 @@ from optimizer import ProximalAdamW
 
 
 # ---------------------------------------------------------------------------
+# MixUp Regularization Utilities
+# ---------------------------------------------------------------------------
+def mixup_data(x, y, alpha=1.0):
+    """Returns mixed inputs, pairs of targets, and lambda"""
+    if alpha > 0:
+        lam = torch.distributions.beta.Beta(alpha, alpha).sample().item()
+    else:
+        lam = 1.0
+    batch_size = x.size()[0]
+    index = torch.randperm(batch_size, device=x.device)
+    mixed_x = lam * x + (1 - lam) * x[index, :]
+    y_a, y_b = y, y[index]
+    return mixed_x, y_a, y_b, lam
+
+def mixup_criterion(criterion, pred, y_a, y_b, lam):
+    return lam * criterion(pred, y_a) + (1 - lam) * criterion(pred, y_b)
+
+# ---------------------------------------------------------------------------
 # Training Loop
 # ---------------------------------------------------------------------------
 def train_epoch(model, dataloader, optimizer, criterion, scaler, device, accum_steps=4, use_amp=False):
@@ -28,10 +46,18 @@ def train_epoch(model, dataloader, optimizer, criterion, scaler, device, accum_s
         images = batch['image'].to(device, non_blocking=True)
         labels = batch['label'].to(device, non_blocking=True)
 
+        # Forward with optional MixUp
+        use_mixup = torch.rand(1).item() < 0.5
+        if use_mixup:
+            images, y_a, y_b, lam = mixup_data(images, labels, alpha=1.0)
+
         # Forward pass (AMP disabled by default — custom DAPSG autograd produces NaN in float16)
         with torch.amp.autocast('cuda', enabled=use_amp):
             logits = model(images)
-            loss = criterion(logits, labels) / accum_steps
+            if use_mixup:
+                loss = mixup_criterion(criterion, logits, y_a, y_b, lam) / accum_steps
+            else:
+                loss = criterion(logits, labels) / accum_steps
 
         # Backward pass
         scaler.scale(loss).backward()
@@ -49,7 +75,11 @@ def train_epoch(model, dataloader, optimizer, criterion, scaler, device, accum_s
         # Metrics
         total_loss += loss.item() * accum_steps
         preds = logits.argmax(dim=1)
-        correct += (preds == labels).sum().item()
+        if use_mixup:
+            target_label = y_a if lam > 0.5 else y_b
+            correct += (preds == target_label).sum().item()
+        else:
+            correct += (preds == labels).sum().item()
         total += labels.size(0)
 
         pbar.set_postfix({
@@ -315,7 +345,9 @@ def main():
         torch.save(ckpt, 'dsit_latest.pth')
         if is_best:
             torch.save(ckpt, 'dsit_best.pth')
-            print(f"  *** New best val acc: {best_val_acc * 100:.2f}% ***")
+            unique_name = f'dsit_best_epoch{epoch+1}_acc{best_val_acc * 100:.2f}.pth'
+            torch.save(ckpt, unique_name)
+            print(f"  *** New best val acc: {best_val_acc * 100:.2f}% (Saved as {unique_name}) ***")
 
     print(f"\nTraining complete. Best val acc: {best_val_acc * 100:.2f}%")
 
