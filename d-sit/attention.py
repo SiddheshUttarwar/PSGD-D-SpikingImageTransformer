@@ -8,17 +8,14 @@ class ShiftedReLUSign(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, threshold=0.5):
         ctx.save_for_backward(x)
-        out = torch.zeros_like(x)
-        out[x > threshold] = 1.0
-        out[x < -threshold] = -1.0
-        return out
+        # torch.where keeps static shapes — boolean fancy-index assignment
+        # (out[mask] = val) creates dynamic shapes that force XLA to recompile every step.
+        return (x > threshold).to(x.dtype) - (x < -threshold).to(x.dtype)
 
     @staticmethod
     def backward(ctx, grad_output):
         x, = ctx.saved_tensors
-        grad_x = grad_output.clone()
-        grad_x[x.abs() > 1.0] = 0.0
-        return grad_x, None
+        return grad_output * (x.abs() <= 1.0).to(grad_output.dtype), None
 
 
 class TernaryLIFNode(nn.Module):

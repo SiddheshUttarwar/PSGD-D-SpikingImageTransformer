@@ -373,7 +373,7 @@ def main(args=None):
 
     val_loader = DataLoader(val_ds, batch_size=args.batch_size, shuffle=False,
                             collate_fn=val_collate, num_workers=2,
-                            pin_memory=pin)
+                            pin_memory=pin, drop_last=True)
 
     # --- Model ---
     log(f"Building D-SIT: embed_dim={args.embed_dim}, depth={args.depth}, "
