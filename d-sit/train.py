@@ -313,12 +313,9 @@ def main():
 
     # Accelerate on A100
     torch.set_float32_matmul_precision('high')
-    if hasattr(torch, 'compile'):
-        print("Compiling model with torch.compile() for A100 speedup...")
-        try:
-            model = torch.compile(model)
-        except Exception as e:
-            print(f"torch.compile failed: {e}. Falling back to eager mode.")
+    
+    # NOTE: torch.compile() removed because it causes graph-break explosions 
+    # and infinite compiler hangs on custom Spiking autograd.Functions
 
     param_count = sum(p.numel() for p in model.parameters()) / 1e6
     print(f"Parameters: {param_count:.2f}M")
