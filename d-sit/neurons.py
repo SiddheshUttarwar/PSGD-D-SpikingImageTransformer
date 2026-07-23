@@ -198,7 +198,7 @@ class LIFNode(nn.Module):
         spike = DAPSG.apply(effective_u, self.v_th, d_tracker, self.alpha_base, self.kappa, D_local)
         self.prev_spike = spike.detach()
 
-        delta_w_d = D_t * self.epsilon.sum()
+        delta_w_d = (D_t * self.epsilon).sum()
         if self.w_d.grad is None:
             self.w_d.grad = torch.zeros_like(self.w_d)
         self.w_d.grad -= delta_w_d
