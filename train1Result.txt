@@ -471,7 +471,8 @@ Epoch 40/100  |  LR: 0.000767
 Training: 100% 390/390 [02:21<00:00,  2.75it/s, loss=3.2250, acc=34.07%, D(t)=0.1380]
 Validating: 100% 79/79 [00:10<00:00,  7.44it/s]
 Train Loss: 3.2250 | Train Acc: 34.07%
-Val   Loss: 2.5778 | Val   Acc: 45.08%
+Val   Loss: 2.5778 | Val   Acc: 
+
 Dopamine D(t): 0.137994
 Head Pruning Status:
   Block  0: 8/8 heads alive

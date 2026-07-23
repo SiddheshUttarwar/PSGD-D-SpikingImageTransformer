@@ -3,99 +3,49 @@ import torch.nn as nn
 from neurons import LIFNode, IntrinsicDopamineTracker
 from tokenizer import TimeDelayTokenizer
 from attention import HeterogeneousSpikingSelfAttention
+from astrocyte import AstrocyticSyncytium
 
 
-class SpikingConvStem(nn.Module):
+class HybridANNConvStem(nn.Module):
     """
-    4-Layer Spiking Convolutional Stem.
-
-    For CIFAR-100 (32x32 input):
-      Input 32x32  -> Layer1 (stride 2 + pool 2)  -> 8x8
-                   -> Layer2-4 (stride 1)          -> 8x8
-    Output: (B, 64, embed_dim) per timestep.
-
-    For ImageNet (224x224 input):
-      Input 224x224 -> Layer1 (stride 2 + pool 2) -> 56x56
-                    -> Layer2 (stride 2)           -> 28x28
-                    -> Layer3 (stride 2)           -> 14x14
-                    -> Layer4 (stride 1)           -> 14x14
-    Output: (B, 196, embed_dim) per timestep.
+    Hybrid ANN Dense Stem for >80% CIFAR-100 Accuracy.
+    
+    Instead of aggressively downsampling 32x32 to 8x8 (64 tokens) using spikes, 
+    this continuous stem extracts rich continuous features and outputs a 16x16 
+    (256 token) dense grid. This dramatically preserves spatial geometry.
     """
-    def __init__(self, in_channels=3, embed_dim=768, img_size=224):
+    def __init__(self, in_channels=3, embed_dim=768, img_size=32):
         super().__init__()
         self.img_size = img_size
-
-        if img_size >= 224:
-            self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
-            self.pool_shortcut = nn.Sequential(
-                nn.MaxPool2d(3, stride=2, padding=1),
-                nn.Conv2d(in_channels, 64, kernel_size=1, bias=False)
-            )
-            self.bn1 = nn.BatchNorm2d(64)
-            self.lif1 = LIFNode()
-            self.pool1 = nn.MaxPool2d(2, 2)
-
-            self.conv2 = nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=1, bias=False)
-            self.bn2 = nn.BatchNorm2d(128)
-            self.lif2 = LIFNode()
-
-            self.conv3 = nn.Conv2d(128, 384, kernel_size=3, stride=2, padding=1, bias=False)
-            self.bn3 = nn.BatchNorm2d(384)
-            self.lif3 = LIFNode()
-
-            self.conv4 = nn.Conv2d(384, embed_dim, kernel_size=3, stride=1, padding=1, bias=False)
-            self.bn4 = nn.BatchNorm2d(embed_dim)
-            self.lif4 = LIFNode()
-        else:
-            # CIFAR stem (32x32) -> 8x8 = 64 tokens
-            self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=2, padding=1, bias=False)
-            self.pool_shortcut = nn.Sequential(
-                nn.MaxPool2d(3, stride=2, padding=1),
-                nn.Conv2d(in_channels, 64, kernel_size=1, bias=False)
-            )
-            self.bn1 = nn.BatchNorm2d(64)
-            self.lif1 = LIFNode()
-            self.pool1 = nn.MaxPool2d(2, 2)
-
-            self.conv2 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1, bias=False)
-            self.bn2 = nn.BatchNorm2d(128)
-            self.lif2 = LIFNode()
-
-            self.conv3 = nn.Conv2d(128, 384, kernel_size=3, stride=1, padding=1, bias=False)
-            self.bn3 = nn.BatchNorm2d(384)
-            self.lif3 = LIFNode()
-
-            self.conv4 = nn.Conv2d(384, embed_dim, kernel_size=3, stride=1, padding=1, bias=False)
-            self.bn4 = nn.BatchNorm2d(embed_dim)
-            self.lif4 = LIFNode()
-
+        
+        # 32x32 -> stride 2 -> 16x16 (dense grid)
+        self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=2, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(64)
+        self.act1 = nn.GELU()
+        
+        # 16x16 -> stride 1 -> 16x16
+        self.conv2 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(128)
+        self.act2 = nn.GELU()
+        
+        self.conv3 = nn.Conv2d(128, embed_dim, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn3 = nn.BatchNorm2d(embed_dim)
+        self.act3 = nn.GELU()
+        
     def reset_state(self):
-        self.lif1.reset_state()
-        self.lif2.reset_state()
-        self.lif3.reset_state()
-        self.lif4.reset_state()
+        # Continuous stem has no spiking state
+        pass
 
-    def forward(self, x, d_tracker):
+    def forward(self, x, d_tracker=None):
         """
         x: (B, C, H, W)
-        Returns: (B, N, D) at a single timestep
+        Returns: (B, N, D) continuous floats
         """
-        x_pool = self.pool_shortcut(x)
-        x = self.bn1(self.conv1(x) + x_pool)
-        s1, _ = self.lif1(x, d_tracker)
-        p1 = self.pool1(s1)
-
-        x = self.bn2(self.conv2(p1))
-        s2, _ = self.lif2(x, d_tracker)
-
-        x = self.bn3(self.conv3(s2))
-        s3, _ = self.lif3(x, d_tracker)
-
-        x = self.bn4(self.conv4(s3))
-        s4, _ = self.lif4(x, d_tracker)
-
+        x = self.act1(self.bn1(self.conv1(x)))
+        x = self.act2(self.bn2(self.conv2(x)))
+        x = self.act3(self.bn3(self.conv3(x)))
         # Flatten spatial -> (B, N, D)
-        out = s4.flatten(2).transpose(1, 2)
+        out = x.flatten(2).transpose(1, 2)
         return out
 
 
@@ -118,54 +68,58 @@ class SpikingMLP(nn.Module):
         self.lif1.reset_state()
         self.lif2.reset_state()
 
-    def forward(self, x, d_tracker, residual_u=None):
+    def forward(self, x, d_tracker, residual_u=None, D_local=None):
         B, N, D = x.shape
 
         c1 = self.fc1(x)
         c1 = self.bn1(c1.reshape(B * N, -1)).reshape(B, N, -1)
-        s1, _ = self.lif1(c1, d_tracker)
+        s1, _ = self.lif1(c1, d_tracker, D_local=D_local)
         s1 = self.dropout(s1)
 
         c2 = self.fc2(s1)
         c2 = self.bn2(c2.reshape(B * N, -1)).reshape(B, N, -1)
-        s2, u2 = self.lif2(c2, d_tracker, residual_u=residual_u)
+        s2, u2 = self.lif2(c2, d_tracker, residual_u=residual_u, D_local=D_local)
 
         return s2, u2
 
 
 class DSITBlock(nn.Module):
     """
-    Single D-SIT transformer block: SSA -> S-MLP
-    with ReZero-style scaled residual to prevent gradient explosion.
+    Single D-SIT transformer block: SSA -> S-MLP with dual ReZero residuals.
 
-    Diagnostic showed gradients exploding ~1000x per block through unscaled
-    residual. ReZero initializes the residual scale at 0.1 so each block's
-    contribution starts small and is learned during training.
+    Consensus changes (3-agent debate):
+    - Change 6: Two separate learnable res_scale params (attn + MLP).
+      Attention output (spikes) and MLP output (floats) have different statistics,
+      requiring independent geometric scaling.
+    - Change 6: Attention NOW has its own residual: x = x + res_scale_attn * Attn(x).
+      Without this, attention had no gradient bypass in 12-block networks.
+    - Change 7: Both init at 0 (true ReZero). Identity mapping guaranteed at step 0.
+      First gradient: dL/d_scale = branch_output * upstream_grad != 0 (non-zero spikes).
+      Biologically: silent synapses (NMDA-only) that mature via activity-dependent LTP.
     """
     def __init__(self, embed_dim=768, num_heads=12, mlp_ratio=4.0):
         super().__init__()
         self.attn = HeterogeneousSpikingSelfAttention(embed_dim, num_heads)
         self.mlp = SpikingMLP(embed_dim, int(embed_dim * mlp_ratio))
-        # ReZero: learnable scale, 0.1 lets blocks contribute meaningfully while still stable
-        self.res_scale = nn.Parameter(torch.tensor(0.1))
+        # Change 7: init=0 for true ReZero (identity mapping at step 0)
+        self.res_scale_attn = nn.Parameter(torch.zeros(1))
+        self.res_scale_mlp  = nn.Parameter(torch.zeros(1))
 
     def reset_state(self):
         self.attn.reset_state()
         self.mlp.reset_state()
 
-    def forward(self, x, d_tracker, mask=None, residual_u=None):
-        identity = x
+    def forward(self, x, d_tracker, mask=None, residual_u=None, D_local=None):
+        # Change 6: Dual residual — attention gets its own identity bypass.
+        # Without this, gradient through attention in 12-block network had no shortcut.
+        x_attn = self.attn(x, d_tracker, mask=mask, D_local=D_local)
+        x = x + self.res_scale_attn * x_attn          # attention residual
 
-        # Attention
-        x_attn = self.attn(x, d_tracker, mask=mask)
+        # MLP receives post-attention-residual x (not raw x_attn)
+        x_out, u_out = self.mlp(x, d_tracker, residual_u=residual_u, D_local=D_local)
+        x = x + self.res_scale_mlp * x_out            # MLP residual
 
-        # MLP with membrane shortcut
-        x_out, u_out = self.mlp(x_attn, d_tracker, residual_u=residual_u)
-
-        # Scaled residual: prevents gradient explosion through the block chain
-        x_out = identity + self.res_scale * x_out
-
-        return x_out, u_out
+        return x, u_out
 
 
 class DSIT(nn.Module):
@@ -185,14 +139,17 @@ class DSIT(nn.Module):
         super().__init__()
         self.T = T
         self.depth = depth
-        self.stem = SpikingConvStem(in_channels, embed_dim, img_size=img_size)
+        self.stem = HybridANNConvStem(in_channels, embed_dim, img_size=img_size)
         self.tokenizer = TimeDelayTokenizer(embed_dim)
+        
+        # Instantiate Astrocytic Syncytium for localized credit assignment
+        self.astrocyte = AstrocyticSyncytium()
 
         # Learnable 2D positional embedding — tokens are otherwise spatially unaware
         if img_size >= 224:
             num_patches = (img_size // 16) ** 2
         else:
-            num_patches = (img_size // 4) ** 2
+            num_patches = (img_size // 2) ** 2  # Dense Tokenizer (stride 2 total -> 16x16 = 256 patches)
         self.pos_embed = nn.Parameter(torch.zeros(1, num_patches, embed_dim))
         nn.init.trunc_normal_(self.pos_embed, std=0.02)
 
@@ -224,6 +181,7 @@ class DSIT(nn.Module):
     def reset_all_states(self):
         """Reset membrane potentials of ALL spiking neurons in the network."""
         self.stem.reset_state()
+        self.astrocyte.reset_state()
         for blk in self.blocks:
             blk.reset_state()
 
@@ -255,7 +213,11 @@ class DSIT(nn.Module):
             u_prev = None
             for t in range(self.T):
                 x_t = x_seq[t]
-                x_t, u_prev = blk(x_t, self.d_tracker, mask=None, residual_u=u_prev)
+                
+                # Astrocytic Integration: Compute localized dopamine based on activity
+                D_local = self.astrocyte(x_t, self.d_tracker.get_D())
+                
+                x_t, u_prev = blk(x_t, self.d_tracker, mask=None, residual_u=u_prev, D_local=D_local)
                 block_outputs.append(x_t)
             x_seq = torch.stack(block_outputs, dim=0)
 
