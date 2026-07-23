@@ -278,8 +278,16 @@ def main():
 
     # --- Data Loading ---
     print(f"Loading {args.dataset} (img_size={img_size})...")
-    train_ds = load_dataset(args.dataset, split=train_split, trust_remote_code=True)
-    val_ds = load_dataset(args.dataset, split=val_split, trust_remote_code=True)
+    try:
+        train_ds = load_dataset(args.dataset, split=train_split, trust_remote_code=True)
+        val_ds = load_dataset(args.dataset, split=val_split, trust_remote_code=True)
+    except Exception as e:
+        if "trust_remote_code" in str(e):
+            print("Retrying load_dataset without trust_remote_code...")
+            train_ds = load_dataset(args.dataset, split=train_split)
+            val_ds = load_dataset(args.dataset, split=val_split)
+        else:
+            raise e
     print(f"Train samples: {len(train_ds)}, Val samples: {len(val_ds)}")
 
     train_collate, val_collate = make_collate_fn(img_size)
