@@ -82,7 +82,8 @@ class DAPSG(torch.autograd.Function):
         grad_u = (1.0 / (2.0 * alpha)) * (1.0 + (u - v_th).abs() / alpha).pow(-2)
         # Change 2: grad for learnable threshold. dS/dv_th = -dS/du
         grad_v_th = -(grad_output * grad_u).sum()
-        return grad_output * grad_u, grad_v_th, None, None, None
+        # Returns 6 items: u, v_th, d_tracker, alpha_base, kappa, D_local
+        return grad_output * grad_u, grad_v_th, None, None, None, None
 
 
 class TernaryDAPSG(torch.autograd.Function):
@@ -134,7 +135,8 @@ class TernaryDAPSG(torch.autograd.Function):
         # and a strict mask would permanently kill near-threshold neurons.
         grad_u = torch.where(u >= 0, grad_u_pos, grad_u_neg)
         grad_v_th = -(grad_output * grad_u).sum()
-        return grad_output * grad_u, grad_v_th, None, None, None
+        # Returns 6 items: u, v_th, d_tracker, alpha_base, kappa, D_local
+        return grad_output * grad_u, grad_v_th, None, None, None, None
 
 
 class LIFNode(nn.Module):

@@ -132,7 +132,13 @@ class HeterogeneousSpikingSelfAttention(nn.Module):
         
         # DLIA: Spiking Softmax via DAPSG
         v_th_tensor = torch.tensor(self.v_th_attn, device=x.device, dtype=x.dtype)
-        self.A_attn = DAPSG.apply(self.U_attn, v_th_tensor, d_tracker, 2.0, 3.0, D_local)
+        # D_local is (B, N, 1). To apply it over the (B, H, N, N) attention matrix,
+        # we must broadcast it to match U_attn.
+        if D_local is not None:
+            D_local_broadcast = D_local.view(B, 1, N, 1).expand(-1, self.num_heads, -1, N)
+        else:
+            D_local_broadcast = None
+        self.A_attn = DAPSG.apply(self.U_attn, v_th_tensor, d_tracker, 2.0, 3.0, D_local_broadcast)
         
         # Route Information via Spiking Softmax
         x_attn = self.A_attn @ v   # (B, H, N, d_h)
