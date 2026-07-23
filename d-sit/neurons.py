@@ -173,9 +173,8 @@ class LIFNode(nn.Module):
             self.epsilon = torch.zeros_like(x)
             self.prev_spike = torch.zeros_like(x)
 
-        # Clamp v_th to prevent negative threshold explosion
-        with torch.no_grad():
-            self.v_th.clamp_(min=0.01)
+        # Clamp v_th out-of-place to prevent negative threshold explosion without in-place errors
+        v_th_clamped = self.v_th.clamp(min=0.01)
 
         if D_local is not None:
             D_t = D_local
@@ -195,14 +194,14 @@ class LIFNode(nn.Module):
             self.epsilon = immediate_impact + lambda_t * self.epsilon
 
         # Change 4: Soft reset. spike in {0,1}: u - v_th*1 after spike.
-        self.u = lambda_t * (self.u - self.v_th * self.prev_spike) + x
+        self.u = lambda_t * (self.u - v_th_clamped * self.prev_spike) + x
 
         if residual_u is not None:
             effective_u = self.u + residual_u
         else:
             effective_u = self.u
 
-        spike = DAPSG.apply(effective_u, self.v_th, d_tracker, self.alpha_base, self.kappa, D_local)
+        spike = DAPSG.apply(effective_u, v_th_clamped, d_tracker, self.alpha_base, self.kappa, D_local)
         self.prev_spike = spike.detach()
 
         with torch.no_grad():
@@ -256,9 +255,8 @@ class TernaryLIFNode(nn.Module):
             self.u = torch.zeros_like(x)
             self.prev_spike = torch.zeros_like(x)
 
-        # Clamp v_th to prevent negative threshold explosion
-        with torch.no_grad():
-            self.v_th.clamp_(min=0.01)
+        # Clamp v_th out-of-place to prevent negative threshold explosion without in-place errors
+        v_th_clamped = self.v_th.clamp(min=0.01)
 
         if D_local is not None:
             D_t = D_local
@@ -275,10 +273,10 @@ class TernaryLIFNode(nn.Module):
 
         # Change 4: Soft reset -- universal formula.
         # prev_spike in {-1,0,+1}: v_th*(-1) = -v_th -> u + v_th for neg spikes.
-        self.u = lambda_t * (self.u - self.v_th * self.prev_spike) + x
+        self.u = lambda_t * (self.u - v_th_clamped * self.prev_spike) + x
 
         # Change 5: TernaryDAPSG -- piecewise gradient, no ghost gradients
-        spike = TernaryDAPSG.apply(self.u, self.v_th, d_tracker, self.alpha_base, self.kappa, D_local)
+        spike = TernaryDAPSG.apply(self.u, v_th_clamped, d_tracker, self.alpha_base, self.kappa, D_local)
 
         self.prev_spike = spike.detach()
         self.u = self.u.detach()
