@@ -158,4 +158,8 @@ class HeterogeneousSpikingSelfAttention(nn.Module):
         attn_spike, _ = self.post_attn_lif(x_out, d_tracker, D_local=D_local)
         attn_spike = self.dropout(attn_spike)
 
+        # Detach temporal DLIA memory states to prevent O(T) BPTT graph buildup
+        self.U_attn = self.U_attn.detach()
+        self.A_attn = self.A_attn.detach()
+
         return attn_spike
