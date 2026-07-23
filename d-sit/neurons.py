@@ -1,3 +1,4 @@
+from torch.amp import custom_fwd, custom_bwd
 import torch
 import torch.nn as nn
 import math
@@ -44,16 +45,12 @@ class IntrinsicDopamineTracker:
 
 class DAPSG(torch.autograd.Function):
     """
-    Dopamine-Modulated Proximal Surrogate Gradient (DA-PSG).
-
     Forward:  s = Theta(u - V_th)
-    Backward: sigma_DA(u) = 1/(2*alpha) * (1 + |u - V_th|/alpha)^(-2)
-              alpha = alpha_base / (1 + kappa * |D(t)|)
-
-    Change 2: Returns grad_v_th = -(grad_output * grad_u).sum()
-    Change 3: Uses |D| in alpha (width responds to surprise magnitude, not sign)
+    Backward: sigma'_DA(u) = 1/(2*alpha) * (1 + |u - V_th|/alpha)^(-2)
+              where alpha = alpha_base / (1 + kappa * D(t))
     """
     @staticmethod
+    @custom_fwd(device_type='cuda', cast_inputs=torch.float32)
     def forward(ctx, u, v_th, d_tracker, alpha_base, kappa, D_local=None):
         ctx.save_for_backward(u, v_th)
         ctx.d_tracker = d_tracker
@@ -63,6 +60,7 @@ class DAPSG(torch.autograd.Function):
         return (u >= v_th).float()
 
     @staticmethod
+    @custom_bwd(device_type='cuda')
     def backward(ctx, grad_output):
         u, v_th = ctx.saved_tensors
         if ctx.D_local is not None:
@@ -102,6 +100,7 @@ class TernaryDAPSG(torch.autograd.Function):
     neuron violating Dale's Principle.
     """
     @staticmethod
+    @custom_fwd(device_type='cuda', cast_inputs=torch.float32)
     def forward(ctx, u, v_th, d_tracker, alpha_base, kappa, D_local=None):
         ctx.save_for_backward(u, v_th)
         ctx.d_tracker = d_tracker
@@ -113,6 +112,7 @@ class TernaryDAPSG(torch.autograd.Function):
         return pos - neg
 
     @staticmethod
+    @custom_bwd(device_type='cuda')
     def backward(ctx, grad_output):
         u, v_th = ctx.saved_tensors
         if ctx.D_local is not None:
