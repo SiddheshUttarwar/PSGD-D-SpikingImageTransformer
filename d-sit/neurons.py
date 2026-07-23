@@ -186,8 +186,9 @@ class LIFNode(nn.Module):
 
         lambda_t = torch.sigmoid(self.w_d * D_t + self.b_lambda)
 
-        immediate_impact = (self.u * (1.0 - self.prev_spike)) * (lambda_t * (1.0 - lambda_t) * D_t)
-        self.epsilon = immediate_impact + lambda_t * self.epsilon
+        with torch.no_grad():
+            immediate_impact = (self.u * (1.0 - self.prev_spike)) * (lambda_t * (1.0 - lambda_t) * D_t)
+            self.epsilon = immediate_impact + lambda_t * self.epsilon
 
         # Change 4: Soft reset. spike in {0,1}: u - v_th*1 after spike.
         self.u = lambda_t * (self.u - self.v_th * self.prev_spike) + x
@@ -200,10 +201,11 @@ class LIFNode(nn.Module):
         spike = DAPSG.apply(effective_u, self.v_th, d_tracker, self.alpha_base, self.kappa, D_local)
         self.prev_spike = spike.detach()
 
-        delta_w_d = (D_t * self.epsilon).sum()
-        if self.w_d.grad is None:
-            self.w_d.grad = torch.zeros_like(self.w_d)
-        self.w_d.grad -= delta_w_d
+        with torch.no_grad():
+            delta_w_d = (D_t * self.epsilon).sum()
+            if self.w_d.grad is None:
+                self.w_d.grad = torch.zeros_like(self.w_d)
+            self.w_d.grad -= delta_w_d
 
         self.u = self.u.detach()
         self.epsilon = self.epsilon.detach()
