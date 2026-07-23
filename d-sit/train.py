@@ -277,17 +277,18 @@ def main():
         print(f"VRAM: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB")
 
     # --- Data Loading ---
-    print(f"Loading {args.dataset} (img_size={img_size})...")
+    dataset_id = args.dataset
+    if dataset_id == 'cifar100':
+        dataset_id = 'uoft-cs/cifar100'
+        
+    print(f"Loading {dataset_id} (img_size={img_size})...")
     try:
-        train_ds = load_dataset(args.dataset, split=train_split, trust_remote_code=True)
-        val_ds = load_dataset(args.dataset, split=val_split, trust_remote_code=True)
+        train_ds = load_dataset(dataset_id, split=train_split)
+        val_ds = load_dataset(dataset_id, split=val_split)
     except Exception as e:
-        if "trust_remote_code" in str(e):
-            print("Retrying load_dataset without trust_remote_code...")
-            train_ds = load_dataset(args.dataset, split=train_split)
-            val_ds = load_dataset(args.dataset, split=val_split)
-        else:
-            raise e
+        # Fallback if that fails
+        train_ds = load_dataset(dataset_id, split=train_split, trust_remote_code=True)
+        val_ds = load_dataset(dataset_id, split=val_split, trust_remote_code=True)
     print(f"Train samples: {len(train_ds)}, Val samples: {len(val_ds)}")
 
     train_collate, val_collate = make_collate_fn(img_size)
