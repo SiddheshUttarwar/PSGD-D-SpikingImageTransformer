@@ -173,6 +173,10 @@ class LIFNode(nn.Module):
             self.epsilon = torch.zeros_like(x)
             self.prev_spike = torch.zeros_like(x)
 
+        # Clamp v_th to prevent negative threshold explosion
+        with torch.no_grad():
+            self.v_th.clamp_(min=0.01)
+
         if D_local is not None:
             D_t = D_local
         else:
@@ -251,6 +255,10 @@ class TernaryLIFNode(nn.Module):
         if self.u is None:
             self.u = torch.zeros_like(x)
             self.prev_spike = torch.zeros_like(x)
+
+        # Clamp v_th to prevent negative threshold explosion
+        with torch.no_grad():
+            self.v_th.clamp_(min=0.01)
 
         if D_local is not None:
             D_t = D_local
