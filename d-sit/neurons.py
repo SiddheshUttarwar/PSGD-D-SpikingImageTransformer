@@ -79,7 +79,7 @@ class DAPSG(torch.autograd.Function):
             alpha = ctx.alpha_base / max(1.0 + ctx.kappa * D, 0.1)
         grad_u = (1.0 / (2.0 * alpha)) * (1.0 + (u - v_th).abs() / alpha).pow(-2)
         # Change 2: grad for learnable threshold. dS/dv_th = -dS/du
-        grad_v_th = -(grad_output * grad_u).sum()
+        grad_v_th = -(grad_output.to(torch.float32) * grad_u).sum()
         # Returns 6 items: u, v_th, d_tracker, alpha_base, kappa, D_local
         return grad_output * grad_u, grad_v_th, None, None, None, None
 
@@ -134,7 +134,8 @@ class TernaryDAPSG(torch.autograd.Function):
         # No deadzone needed: piecewise split halves gradient at origin,
         # and a strict mask would permanently kill near-threshold neurons.
         grad_u = torch.where(u >= 0, grad_u_pos, grad_u_neg)
-        grad_v_th = -(grad_output * grad_u).sum()
+        
+        grad_v_th = -(grad_output.to(torch.float32) * grad_u).sum()
         # Returns 6 items: u, v_th, d_tracker, alpha_base, kappa, D_local
         return grad_output * grad_u, grad_v_th, None, None, None, None
 
@@ -205,7 +206,7 @@ class LIFNode(nn.Module):
         self.prev_spike = spike.detach()
 
         with torch.no_grad():
-            delta_w_d = (D_t * self.epsilon).sum()
+            delta_w_d = (D_t * self.epsilon).to(torch.float32).sum()
             if self.w_d.grad is None:
                 self.w_d.grad = torch.zeros_like(self.w_d)
             self.w_d.grad -= delta_w_d
